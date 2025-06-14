@@ -1,0 +1,139 @@
+/* Header.css */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+/* Default styles for larger screens (desktop) */
+nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+ul {
+  display: flex;
+  gap: 1rem;
+  flex: 1;
+  justify-content: center;
+}
+
+li button {
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+  padding: 0.5rem 1.5rem;
+  transition: all 0.2s ease;
+}
+
+li button img {
+  width: 20px;
+  height: auto;
+  margin-right: 8px;
+}
+
+/* Responsive styles for tablet (max-width: 768px) */
+@media (max-width: 768px) {
+  ul {
+    gap: 0.5rem;
+  }
+
+  li button {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .mr-2 {
+    margin-right: 1rem;
+  }
+
+  .logo {
+    width: 100px; /* Adjust logo size */
+  }
+}
+
+/* Responsive styles for mobile (max-width: 640px) */
+@media (max-width: 640px) {
+  nav {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  ul {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.5rem;
+    display: none; /* Hide nav items by default */
+  }
+
+  ul.active {
+    display: flex; /* Show nav items when toggled */
+    margin-top: 1rem;
+  }
+
+  li {
+    width: 100%;
+  }
+
+  li button {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+  }
+
+  .relative {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+
+  .mr-2 {
+    margin-right: 0;
+    margin-bottom: 0.5rem;
+  }
+
+  .logo {
+    width: 80px; /* Smaller logo for mobile */
+  }
+}
+
+/* Hamburger menu toggle button (for mobile) */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 24px;
+  height: 20px;
+  cursor: pointer;
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+}
+
+.hamburger span {
+  width: 100%;
+  height: 3px;
+  background-color: black;
+  transition: all 0.3s ease;
+}
+
+@media (max-width: 640px) {
+  .hamburger {
+    display: flex;
+  }
+}
+
+/* Active state for hamburger menu */
+.hamburger.active span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.hamburger.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -7px);
+}
