@@ -1,8 +1,14 @@
 import React from 'react'
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import useOutsideClick from './useOutsideClick';
+import { use } from 'react';
 
 function DropDownBtn() {
     const [isOpen, setIsOpen] = useState(false);
+
+    const dropdownRef = useRef();
+
+    useOutsideClick(dropdownRef, () => setIsOpen(false));
 
     const toggleDropdown = () => {
     setIsOpen(!isOpen);
@@ -14,7 +20,7 @@ function DropDownBtn() {
                 <button className='m-2 p-2 text-sm font-semibold'>Become a host</button>
             </div>
             <div className="relative flex items-center justify-between p-3 bg-gray-100 shadow-md rounded-3xl">
-                <button onClick={toggleDropdown} className="focus:outline-none">
+                <button onClick={toggleDropdown} className="focus:outline-none" ref={dropdownRef}>
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path>
                     </svg>

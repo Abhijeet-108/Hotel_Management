@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Container, LogoutBtn, Logo, DropDownBtn } from '../index';
+import { Container, LogoutBtn, Logo, DropDownBtn, SearchBtn } from '../index';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -13,42 +13,42 @@ function Header() {
     const navItems = [
         { 
             name: 'Home',
-            slug: "/home",
+            slug: "/",
             active: true,
-            image:'../../../public/home.png',
+            image:'/home.png',
         },
         { 
             name: 'Experience',
             slug: "/experience",
             active: true,
-            image:'../../../public/experience.jpeg',
+            image:'experience.jpeg',
         },
         { 
             name: 'Services',
             slug: "/services",
             active: true,
-            image:'../../../public/services.jpeg',
+            image:'services.jpeg',
         },
     ]
 
     return (
         <header className="bg-white text-black py-2 shadow">
             <Container>
-                <nav className="flex items-center ">
+                <nav className="flex  items-center">
                     <div className="mr-2">
                         <Link to="/">
                             <Logo width="120px" />
                         </Link>
                     </div>
-                    <ul className='flex gap-4 items-center justify-center flex-1'>
+                    <ul className='flex gap-4 items-center justify-center flex-1  text-2xl'>
                         {navItems.map((item)=>
                             item.active ? (
                                 <li key={item.name}>
                                     <button
                                     onClick={() => navigate(item.slug)}
-                                    className={`flex items-center px-6 py-2 duration-200 ${location.pathname === item.slug ? 'border-b-2 border-black' : ''}`}
+                                    className={`flex items-center px-6 py-2 duration-200 ${location.pathname === item.slug ? 'border-b-2 border-black font-semibold' : ''}`}
                                     >
-                                        <img src={item.image} alt={`${item.name} icon`} style={{ width: '20px', marginRight: '8px' }} />
+                                        <img src={item.image} alt={`${item.name} icon`} style={{ width: '30px', height: '30px' , marginRight: '8px' }} />
                                         {item.name}
                                     </button>
                                 </li>
@@ -63,8 +63,13 @@ function Header() {
                     <div className="relative flex items-center">
                         <DropDownBtn />
                     </div>
+                    
                 </nav>
+                <div className="flex items-center justify-center mt-2">
+                    <SearchBtn />   
+                </div>
             </Container>
+            
         </header>
     );
 }
