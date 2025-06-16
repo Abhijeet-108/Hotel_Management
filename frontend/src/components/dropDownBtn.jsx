@@ -50,7 +50,9 @@ function DropDownBtn() {
 
                     <p className="font-semibold mb-2 p-2 hover:bg-gray-100 cursor-pointer">Find a co-host</p>
                     <hr className="my-2" />
-                    <p className="font-semibold p-2 hover:bg-gray-100 cursor-pointer">Log in or sign up</p>
+                    <p className="font-semibold p-2 hover:bg-gray-100 cursor-pointer"
+                    onClick={navigator('/login')}
+                    >Log in or sign up</p>
                     </div>
                 )}
             </div>

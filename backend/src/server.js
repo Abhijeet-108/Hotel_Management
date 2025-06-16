@@ -1,23 +1,32 @@
 import dotenv from 'dotenv';
-import connectDB from './db/db.js';
+import http from 'http';
 import { app } from './app.js';
+import connectDB from './db/db.js';
+// import { initializeSocket } from './socket.js';
 
-dotenv.config({
-    path: './.env'
-})
+dotenv.config();
+
+const PORT = process.env.PORT || 8000;
+
+const server = http.createServer(app); // Required for Socket.io
+
+// initializeSocket(server); // Pass server to socket initializer
 
 connectDB()
 .then(() => {
-    app.listen(process.env.PORT || 8000, () => {
-        console.log(`Server running on PORT: ${process.env.PORT || 8000}`)
+    server.listen(PORT, () => {
+        console.log(`🚀 Server running on http://localhost:${PORT}`);
+    });
+
+    server.on('error', (err) => {
+        console.error("❌ Server Error: ", err);
+    });
+
+    server.on('close', () => {
+        console.log("🛑 Server Closed");
+    });
     })
-    app.on('error', (err) => {
-        console.log("Server error: ", err);
-    })
-    app.on('close', () => {
-        console.log("Server Closed...")
-    })
-})
-.catch((err) => {
-    console.log("MongoDB connection Failed: ", err);
-})
+    .catch((err) => {
+        console.error("❌ MongoDB connection failed:", err);
+    }
+);

@@ -4,6 +4,7 @@ import './App.css'
 import Home from './pages/Home';
 import Experience from './pages/Experience';
 import Services from './pages/Services';
+import LoginPage from './pages/Login';
 
 function App() {
   
@@ -14,6 +15,7 @@ function App() {
         <Route path='/' element={<Home />} />
         <Route path='/experience' element={<Experience />} />
         <Route path='/services' element={<Services />} />
+        <Route path='/login' element={<LoginPage />} />
       </Routes>
     </div>
   )
