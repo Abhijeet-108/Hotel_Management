@@ -20,10 +20,9 @@ const userSchema = mongoose.Schema({
         type: String,
         required: [true, 'Password is required'],
     },
-    phone : {
-        countryCode: String,
-        phoneNumber: String,
-        required: true
+    phone: {
+        countryCode: { type: String, required: true },
+        phoneNumber: { type: String, required: true }
     },
     DOB: {
         day: String,
