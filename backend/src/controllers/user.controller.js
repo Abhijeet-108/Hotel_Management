@@ -26,11 +26,12 @@ const registerUser = asyncHandler(async (req, res) => {
   const phoneNumber = phone.countryCode + phone.phoneNumber;
 
   // Check if user already exists
-  const existedUser = await User.findOne({ email }); // ✅ Correct method
+  const existedUser = await User.findOne({ email }); 
   if (existedUser) {
     throw new ApiError(409, "User is already registered");
   }
 
+  // no otp => send otp
   if(!otp){
     const generatedOtp = Math.floor(100000 + Math.random()*900000).toString();
     await saveOtp(phoneNumber, generatedOtp, {fullName, email, password, phone});
@@ -38,6 +39,7 @@ const registerUser = asyncHandler(async (req, res) => {
     return res.json(new ApiResponse(200, null, "OTP SENT. Please Verify"));
   }
 
+  // get otp data
   const record = await getOtpData(phoneNumber);
   if(!record || record.otp !== otp){
     throw new ApiError(400, "Invalid or expired otp");
