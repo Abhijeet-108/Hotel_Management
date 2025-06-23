@@ -83,7 +83,7 @@ function Login() {
   };
   
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+    <div className="flex justify-center items-center min-h-screen w-full bg-gray-100">
       {step === 1 && (
         <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
           <div className="flex justify-center items-center mb-6 pb-4 border-b-2">

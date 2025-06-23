@@ -20,6 +20,7 @@
     "fs": "^0.0.1-security",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.15.2",
+    "socket.io": "^4.8.1",
     "twilio": "^5.7.1"
   },
   "devDependencies": {
