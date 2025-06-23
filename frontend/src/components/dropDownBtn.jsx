@@ -81,15 +81,12 @@ function DropDownBtn() {
 
             <hr className="my-2" />
             <p className="font-semibold p-2 hover:bg-gray-100 rounded-lg cursor-pointer">
-              Refer a host
-            </p>
-            <p className="font-semibold p-2 hover:bg-gray-100 rounded-lg cursor-pointer">
               Find a co-host
             </p>
             <hr className="my-2" />
             <Link
             to="/login"
-            className="font-semibold p-2 hover:bg-gray-100 rounded-lg cursor-pointer flex items-center justify-center bg-[#10b461] text-white rounded px-4 py-2 w-full text-lg"
+            className="font-semibold p-2 hover:bg-gray-100 rounded-lg cursor-pointer "
             >
             Log in or sign up
             </Link>
