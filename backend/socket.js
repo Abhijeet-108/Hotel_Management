@@ -1,50 +1,59 @@
-import socketIo from "socket.io";
-import userModel from "./src/Models/user.model.js"
+// socket.js
+import { Server } from "socket.io";
+import {User} from "./src/Models/user.model.js";
 
 let io;
 
-function initializeSocket(server) {
-    io = socketIo(server, {
-        cors: {
-            origin: "http://localhost:3000",
-            methods: ["GET", "POST"],
-            credentials: true,
+export function initializeSocket(server) {
+  io = new Server(server, {
+    cors: {
+      origin: "*",
+      methods: ["GET", "POST"],
+      credentials: true,
+    },
+  });
+
+  io.on("connection", (socket) => {
+    console.log(`🔗 New client connected: ${socket.id}`);
+
+    // Listen for user login
+    socket.on("userLogin", async ({ userId, userType }) => {
+      console.log(`📥 User login received - ID: ${userId}, Type: ${userType}`);
+      try {
+        if (userType === "user") {
+          await User.findByIdAndUpdate(userId, { socketId: socket.id }, { new: true });
+          console.log(`✅ User socketId updated in database for userId: ${userId}`);
+        } else if (userType === "host") {
+          await User.findByIdAndUpdate(userId, { hostSocketId: socket.id }, { new: true });
+          console.log(`✅ Host socketId updated in database for userId: ${userId}`);
+        } else {
+          console.error(`❌ Invalid userType received: ${userType}`);
         }
+      } catch (error) {
+        console.error(`❌ Error updating socketId for userId: ${userId}`, error);
+      }
     });
 
-    io.on("connection", (socket) => {
-        console.log(`🔗 New client connected: ${socket.id}`);
-
-        // Handle user login event
-        socket.on("userLogin", async (data) => {
-            const {userId, userType } = data;
-            console.log(`📥 User login event received for userId: ${userId}, userType: ${userType}`);
-
-            if(userType === 'user'){
-                await userModel.findByIdAndUpdate(userId, { socketId: socket.id }, { new: true })
-                console.log(`✅ User socketId updated in MongoDB for userId: ${userId}`);
-            }else if(userType === 'host'){
-                await userModel.findByIdAndUpdate(userId, { hostSocketId: socket.id }, { new: true })
-                console.log(`✅ Host socketId updated in MongoDB for userId: ${userId}`);
-            }else{
-                console.error(`❌ Invalid userType: ${userType}`);
-            }
-        })
-
-        socket.on("disconnect", () => {
-            console.log(`❌ Client disconnected: ${socket.id}`);
-        });
+    // Disconnect handler
+    socket.on("disconnect", async () => {
+      console.log(`❌ Client disconnected: ${socket.id}`);
+      // try {
+      //   await User.updateOne({ socketId: socket.id }, { $unset: { socketId: "" } });
+      //   await User.updateOne({ hostSocketId: socket.id }, { $unset: { hostSocketId: "" } });
+      // } catch (error) {
+      //   console.error(`❌ Error clearing disconnected socketId ${socket.id}`, error);
+      // }
     });
+  });
 }
 
-const sendMessageToSocket = (socketId, messageObject) => {
-    console.log(`📬 Sending message to socket ${socketId}:`, messageObject);
-
-    if(io){
-        io.to(socketId).emit(messageObject.event, messageObject.data);
-    }else{
-        console.error("❌ Socket.io not initialized");
-    }
+export function sendMessageToSocket(socketId, messageObject) {
+  if (!io) {
+    console.error("❌ Socket.io not initialized");
+    return;
+  }
+  console.log(`📬 Sending message to socket ${socketId}:`, messageObject);
+  io.to(socketId).emit(messageObject.event, messageObject.data);
 }
 
 export default { initializeSocket, sendMessageToSocket };
