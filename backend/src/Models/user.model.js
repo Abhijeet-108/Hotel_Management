@@ -10,17 +10,11 @@ const userSchema = mongoose.Schema({
         lowercase: true,
         trim: true,
     },
-    fullname:{
-        firstname:{
-            type: String,
-            required: true,
-            minlength: [3, 'First name must be at least 3 character long'],
-
-        },
-        lastname:{
-            type: String,
-            minlength: [3, 'last name must be at least 3 character long'],
-        }
+    fullName: {
+        type: String,
+        required: true,
+        trim: true,
+        index: true
     },
     password: {
         type: String,

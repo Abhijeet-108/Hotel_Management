@@ -1,81 +1,94 @@
-import React, { useState } from 'react';
-import PhoneSection from './Login/PhoneSection';
-import OtpSection from './Login/OtpSection';
-import EmailSection from './Login/EmailSection';
-import GoogleSection from './Login/GoogleSection';
-import UserDetailsSection from './Login/UserDetailsSection';
+import React, { useState, useContext } from "react";
+import PhoneSection from "./Login/PhoneSection";
+import OtpSection from "./Login/OtpSection";
+import EmailSection from "./Login/EmailSection";
+import GoogleSection from "./Login/GoogleSection";
+import UserDetailsSection from "./Login/UserDetailsSection";
+import { UserDataContext } from "../context/userContext";
+import { useOtpData } from "../context/OtpContext";
 
 function Login() {
-  const [loginMethod, setLoginMethod] = useState('phone');
-  const [previousMethod, setPreviousMethod] = useState('');
+  const [loginMethod, setLoginMethod] = useState("phone");
+  const [previousMethod, setPreviousMethod] = useState("");
   const [step, setStep] = useState(1);
-  const [phone, setPhone] = useState('');
-  const [otp, setOtp] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [userDetails, setUserDetails] = useState({ name: '', email: '' });
+  const [otp, setOtp] = useState("");
+  const [userDetails, setUserDetails] = useState({ name: "", email: "",  password: "" });
+  const { user, setUser } = useContext(UserDataContext);
+  const {
+    sendOtp,
+    verifyOtp,
+    registerPhoneUser,
+    registerEmailUser,
+    registerGoogleUser,
+    otpSent,
+    verified,
+    error,
+    resetOtpData,
+  } = useOtpData();
 
-  const saveUserToMongoDB = (data) => {
-    console.log('Saving to MongoDB:', data);
-    // Perform actual save with fetch or Axios
+  const methodNames = {
+    phone: "Phone",
+    google: "Google",
+    email: "Email",
   };
   
-  const handlePhoneSubmit = () => {
-    if (!phone.trim()) {
-      alert('Please enter a phone number');
+  // STEP 1: PHONE
+  const handlePhoneSubmit = async () => {
+    const phoneNumber = String(user.phone?.phoneNumber || "").trim();
+    if (!phoneNumber) {
+      alert("Please enter a phone number");
       return;
     }
-    console.log('Sending OTP to:', phone);
-    setStep(2);
+
+    try {
+      await sendOtp(user.phone);
+      alert("OTP request sent successfully!");
+      setStep(2);
+    } catch (error) {
+      alert(error?.response?.data?.message || "Error sending OTP. Try again.");
+    }
   };
+
   
-  const handleOtpSubmit = () => {
+  // STEP 2: VERIFY OTP
+  const handleOtpAction = async (e) => {
+    e.preventDefault();
     if (!otp.trim()) {
-      alert('Enter the received OTP');
+      alert("Please enter an OTP.");
       return;
     }
-    console.log('Verifying OTP:', otp);
+    try {
+      await verifyOtp(user.phone, otp);
+      alert("OTP Verified");
+      setStep(3);
+    } catch (error) {
+      alert(error?.response?.data?.message || "Invalid OTP. Try again.");
+    }
+  };
+  
+  // STEP 1 for Email method
+  const handleEmailSubmit = async () => {
+    if (!user.email.trim() || !user.password.trim()) {
+      alert("Email and password are required");
+      return;
+    }
+    alert("Email confirmed. Proceeding to user details.");
     setStep(3);
   };
   
-  const handleEmailSubmit = () => {
-    if (!email.trim() || !password.trim()) {
-      alert('Email and password are required');
-      return;
-    }
-    console.log('Logging in with email:', email);
-    setStep(3);
-  };
-  
+  // STEP 1 for Google method
   const handleAlternativeLogin = (method) => {
     console.log(`Logging in with ${method}`);
     setStep(3);
-  };
-  
-  const handleUserDetailsSubmit = () => {
-    if (!userDetails.name.trim() || !userDetails.email.trim()) {
-      alert('Please fill in your details');
-      return;
-    }
-    saveUserToMongoDB({ phone, email, ...userDetails, loginMethod });
-    console.log('User details saved:', userDetails);
   };
   
   const switchLoginMethod = (method) => {
     setPreviousMethod(loginMethod);
     setLoginMethod(method);
     setStep(1);
-    setPhone('');
-    setOtp('');
-    setEmail('');
-    setPassword('');
-    setUserDetails({ name: '', email: '' });
-  };
-  
-  const methodNames = {
-    phone: 'Phone',
-    google: 'Google',
-    email: 'Email',
+    setOtp("");
+    resetOtpData();
+    setUserDetails({ name: "", email: "" });
   };
   
   const handleBack = () => {
@@ -89,37 +102,40 @@ function Login() {
           <div className="flex justify-center items-center mb-6 pb-4 border-b-2">
             <h1 className="text-lg font-semibold">Log in or sign up</h1>
           </div>
+          
           <h2 className="text-lg font-semibold mb-4">Welcome to StayFinder</h2>
-
-          {loginMethod === 'phone' && (
+          
+          {loginMethod === "phone" && (
             <PhoneSection
-              phone={phone}
-              setPhone={setPhone}
+              phone={user.phone}
+              setPhone={(updatedPhone) =>
+                setUser({ ...user, phone: updatedPhone })
+              }
               handlePhoneSubmit={handlePhoneSubmit}
             />
           )}
           
-          {loginMethod === 'email' && (
+          {loginMethod === "email" && (
             <EmailSection
-              email={email}
-              setEmail={setEmail}
-              password={password}
-              setPassword={setPassword}
+              email={user.email}
+              setEmail={(email) => setUser({ ...user, email })}
+              password={user.password}
+              setPassword={(password) => setUser({ ...user, password })}
               handleEmailSubmit={handleEmailSubmit}
             />
           )}
           
-          {loginMethod === 'google' && (
+          {loginMethod === "google" && (
             <GoogleSection handleAlternativeLogin={handleAlternativeLogin} />
           )}
-
+          
           <div className="flex items-center my-4">
             <hr className="flex-grow border-gray-300" />
             <span className="mx-2 text-gray-500">or</span>
             <hr className="flex-grow border-gray-300" />
           </div>
-
-          {['google', 'email', 'phone'].map((method) =>
+          
+          {["google", "email", "phone"].map((method) =>
             method !== loginMethod ? (
               <button
                 key={method}
@@ -127,22 +143,22 @@ function Login() {
                 className="flex items-center w-full p-3 border rounded mb-2 hover:bg-gray-100"
               >
                 <span className="mr-2 rounded-sm">
-                  {method === 'google' ? 'G' : method === 'email' ? '✉️' : '📞'}
+                  {method === "google" ? "G" : method === "email" ? "✉️" : "📞"}
                 </span>
-                Continue with {previousMethod === method ? methodNames[previousMethod] : methodNames[method]}
+                Continue with {methodNames[method]}
               </button>
             ) : null
           )}
         </div>
       )}
       
-      {step === 2 && loginMethod === 'phone' && (
+      {step === 2 && loginMethod === "phone" && (
         <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
           <OtpSection
             otp={otp}
             setOtp={setOtp}
-            handleOtpSubmit={handleOtpSubmit}
-            PhoneNumber={phone}
+            handleOtpSubmit={handleOtpAction}
+            phoneNumber={user.phone.phoneNumber}
             handleBack={handleBack}
           />
         </div>
@@ -150,11 +166,7 @@ function Login() {
       
       {step === 3 && (
         <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-          <UserDetailsSection
-            userDetails={userDetails}
-            setUserDetails={setUserDetails}
-            handleUserDetailsSubmit={handleUserDetailsSubmit}
-          />
+          <UserDetailsSection handleBack={handleBack} />
         </div>
       )}
     </div>
@@ -162,3 +174,4 @@ function Login() {
 }
 
 export default Login;
+
