@@ -23,6 +23,31 @@ const OtpContextProvider = ({ children }) => {
   const [otpSent, setOtpSent] = useState(false);
   const [verified, setVerified] = useState(false);
 
+  // AUTH LOGIC STARTS
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
+
+  // Check for user in local storage (or JWT token) when component mounts
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+      setIsLoggedIn(true);
+    }
+  }, []);
+
+  const login = async (userData) => {
+    setUser(userData);
+    localStorage.setItem("user", JSON.stringify(userData));
+    setIsLoggedIn(true);
+  };
+  const logout = async () => {
+    localStorage.removeItem("user");
+    setUser(null);
+    setIsLoggedIn(false);
+  };
+  // AUTH LOGIC ENDS
+
   // Reset method
   const resetOtpData = () =>
     setOtpData({
@@ -140,6 +165,11 @@ const OtpContextProvider = ({ children }) => {
         error,
         otpSent,
         verified,
+        // AUTH CONTEXT VALUES
+        isLoggedIn,
+        user,
+        login,
+        logout,
       }}
     >
       {children}

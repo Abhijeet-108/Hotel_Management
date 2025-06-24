@@ -54,11 +54,11 @@ function Header() {
                                 </li>
                             ) : null
                         )}
-                        {authStatus && (
-                            <li>
-                                <LogoutBtn />
-                            </li>
-                        )}
+                        {/* {navItems && (
+                        //     <li>
+                        //         <LogoutBtn />
+                        //     </li>
+                        // )} */}
                     </ul>
                     <div className="relative flex items-center">
                         <DropDownBtn />

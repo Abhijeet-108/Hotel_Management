@@ -53,11 +53,14 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Invalid or expired OTP");
       }
 
+      console.log("[verify_otp] record:", record);
+
       sendMessageToSocket(phoneNumber, {
         event: "otp_verified",
         data: { phoneNumber },
       });
-      return res.json(new ApiResponse(200, null, "OTP Verified"));
+      return res.json(new ApiResponse(200, record.userData, "OTP Verified"));
+
     }
 
     case "register_phone_user": {

@@ -1,18 +1,12 @@
-// userContext.jsx
 import React, { createContext, useState, useContext } from "react";
 
 export const UserDataContext = createContext();
 
-// Exported hook
-export const useUserData = () => {
-  return useContext(UserDataContext);
-};
-
 const UserContext = ({ children }) => {
-  const [user, setUser] = useState({
+  const [userData, setUserData] = useState({
     phone: {
       countryCode: "+91",
-      phoneNumber: "" // IMPORTANT: Initialize as an empty string
+      phoneNumber: "" 
     },
     fullname: "",
     email: "",
@@ -20,7 +14,7 @@ const UserContext = ({ children }) => {
   });
 
   return (
-    <UserDataContext.Provider value={{ user, setUser }}>
+    <UserDataContext.Provider value={{ userData, setUserData }}>
       {children}
     </UserDataContext.Provider>
   );

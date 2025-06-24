@@ -13,7 +13,7 @@ function Login() {
   const [step, setStep] = useState(1);
   const [otp, setOtp] = useState("");
   const [userDetails, setUserDetails] = useState({ name: "", email: "",  password: "" });
-  const { user, setUser } = useContext(UserDataContext);
+  const { userData, setUserData } = useContext(UserDataContext);
   const {
     sendOtp,
     verifyOtp,
@@ -24,6 +24,7 @@ function Login() {
     verified,
     error,
     resetOtpData,
+    login,
   } = useOtpData();
 
   const methodNames = {
@@ -34,14 +35,14 @@ function Login() {
   
   // STEP 1: PHONE
   const handlePhoneSubmit = async () => {
-    const phoneNumber = String(user.phone?.phoneNumber || "").trim();
+    const phoneNumber = String(userData.phone?.phoneNumber || "").trim();
     if (!phoneNumber) {
       alert("Please enter a phone number");
       return;
     }
 
     try {
-      await sendOtp(user.phone);
+      await sendOtp(userData.phone);
       alert("OTP request sent successfully!");
       setStep(2);
     } catch (error) {
@@ -58,9 +59,14 @@ function Login() {
       return;
     }
     try {
-      await verifyOtp(user.phone, otp);
-      alert("OTP Verified");
-      setStep(3);
+      const res = await verifyOtp(userData.phone, otp);
+      console.log("verifyOtp response:", res);
+      if(res?.data){
+        login(res.data);
+        console.log(res.data);
+        alert("OTP Verified");
+        setStep(3);
+      }
     } catch (error) {
       alert(error?.response?.data?.message || "Invalid OTP. Try again.");
     }
@@ -68,7 +74,7 @@ function Login() {
   
   // STEP 1 for Email method
   const handleEmailSubmit = async () => {
-    if (!user.email.trim() || !user.password.trim()) {
+    if (!userData.email.trim() || !userData.password.trim()) {
       alert("Email and password are required");
       return;
     }
@@ -88,7 +94,7 @@ function Login() {
     setStep(1);
     setOtp("");
     resetOtpData();
-    setUserDetails({ name: "", email: "" });
+    setUserData({ phone: { countryCode: "+91", phoneNumber: "" }, email: "", password: "" });
   };
   
   const handleBack = () => {
@@ -107,9 +113,9 @@ function Login() {
           
           {loginMethod === "phone" && (
             <PhoneSection
-              phone={user.phone}
+              phone={userData.phone}
               setPhone={(updatedPhone) =>
-                setUser({ ...user, phone: updatedPhone })
+                setUserData({ ...userData, phone: updatedPhone })
               }
               handlePhoneSubmit={handlePhoneSubmit}
             />
@@ -117,10 +123,10 @@ function Login() {
           
           {loginMethod === "email" && (
             <EmailSection
-              email={user.email}
-              setEmail={(email) => setUser({ ...user, email })}
-              password={user.password}
-              setPassword={(password) => setUser({ ...user, password })}
+              email={userData.email}
+              setEmail={(email) => setUserData({ ...userData, email })}
+              password={userData.password}
+              setPassword={(password) => setUserData({ ...userData, password })}
               handleEmailSubmit={handleEmailSubmit}
             />
           )}
@@ -158,7 +164,7 @@ function Login() {
             otp={otp}
             setOtp={setOtp}
             handleOtpSubmit={handleOtpAction}
-            phoneNumber={user.phone.phoneNumber}
+            phoneNumber={userData.phone}
             handleBack={handleBack}
           />
         </div>

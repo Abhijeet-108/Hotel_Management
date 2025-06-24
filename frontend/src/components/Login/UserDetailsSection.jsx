@@ -1,21 +1,26 @@
 import React, { useState, useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { UserDataContext } from '../../context/userContext';
 import { FaArrowLeft } from 'react-icons/fa';
+import { useOtpData } from '../../context/OtpContext';
 
-function UserDetailsSection( {handleBack}) {
+function UserDetailsSection({ handleBack }) {
   const [email, setEmail] = useState('');
   const [fullname, setFullname] = useState('');
   const [password, setPassword] = useState('');
 
   const navigate = useNavigate();
-  const { user, setUser } = useContext(UserDataContext);
+
+  // ✅ Get only userData for phone from UserDataContext
+  const { userData } = useContext(UserDataContext);
+
+  // ✅ Get login method from OtpContext
+  const { login } = useOtpData();
 
   const handleUserDetailsSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate inputs
     if (!fullname.trim() || !email.trim() || !password.trim()) {
       alert('Please fill in all fields!');
       return;
@@ -28,11 +33,11 @@ function UserDetailsSection( {handleBack}) {
         password,
         fullName: fullname,
         phone: {
-          countryCode: user.phone?.countryCode,
-          phoneNumber: user.phone?.phoneNumber,
+          countryCode: userData.phone?.countryCode,
+          phoneNumber: userData.phone?.phoneNumber,
         },
       };
-      console.log("Register payload:", payload);
+      console.log('Register payload:', payload);
 
       const response = await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/api/v1/users/login`,
@@ -40,7 +45,8 @@ function UserDetailsSection( {handleBack}) {
       );
 
       if (response.data && response.data.data) {
-        setUser(response.data.data);
+        // ✅ Final fix: Just call login() with the returned user data
+        login(response.data.data);
         alert('User registered successfully!');
         navigate('/');
       }
@@ -61,13 +67,13 @@ function UserDetailsSection( {handleBack}) {
           onClick={handleBack}
           className='cursor-pointer text-gray-700 text-xl'
         />
-        <h2 className='text-lg font-semibold text-center w-full '>Finish signing up</h2>
+        <h2 className='text-lg font-semibold text-center w-full'>Finish signing up</h2>
       </div>
-      <hr className='my-2 border-gray-100'/>
+      <hr className='my-2 border-gray-100' />
 
       <form
         onSubmit={handleUserDetailsSubmit}
-        className="max-w-md mx-auto p-6 bg-white rounded "
+        className="max-w-md mx-auto p-6 bg-white rounded"
       >
         <div className="mb-4">
           <label className="block text-gray-600 mb-2 font-semibold">Legal name</label>
@@ -79,7 +85,10 @@ function UserDetailsSection( {handleBack}) {
             placeholder="Enter your name"
             required
           />
-          <p className='text-xs font-semibold text-gray-500'>Make sure this matches the name on your government ID. If you go by another name, you can add a <a href="#" className='underline'>preferred first name</a></p>
+          <p className='text-xs font-semibold text-gray-500'>
+            Make sure this matches the name on your government ID. If you go by another name, you can add a{' '}
+            <a href="#" className='underline'>preferred first name</a>
+          </p>
         </div>
 
         <div className="mb-4">
@@ -106,7 +115,11 @@ function UserDetailsSection( {handleBack}) {
           />
         </div>
 
-        <p className='text-xs text-gray-500 mb-4 font-light'>By selecting <b className='font-semibold'>Agree and continue</b>, I agree to StayFinder's <a href="#" className='underline font-semibold text-blue-400'>Terms of Service</a> and <a href="#" className='underline font-semibold text-blue-400'>Privacy Policy</a>.</p>
+        <p className='text-xs text-gray-500 mb-4 font-light'>
+          By selecting <b className='font-semibold'>Agree and continue</b>, I agree to StayFinder's{' '}
+          <a href="#" className='underline font-semibold text-blue-400'>Terms of Service</a> and{' '}
+          <a href="#" className='underline font-semibold text-blue-400'>Privacy Policy</a>.
+        </p>
 
         <button
           type="submit"
