@@ -4,7 +4,7 @@ import Container from "./Container/Container"
 import Logo from "./Logo";
 import LogoutBtn from "./Header/LogoutBtn";
 import Button from "./Button";
-import SearchBtn from "./SearchBtn";
+import SearchBtn from "./SearchBtn/SearchBtn";
 // import Select from "./Select";
 // import RTE from "./RTE";
 import Login from "../pages/Login";

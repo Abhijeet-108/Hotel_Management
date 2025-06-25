@@ -8,6 +8,7 @@ function DropDownBtn() {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
   const { isLoggedIn, user } = useOtpData();
+  console.log(isLoggedIn, user)
 
   useOutsideClick(dropdownRef, () => setIsOpen(false));
 
@@ -22,22 +23,23 @@ function DropDownBtn() {
       </div>
       <div
         ref={dropdownRef}
-        className="relative flex items-center justify-between p-3 bg-gray-100 shadow-md rounded-3xl"
+        className="relative flex items-center justify-between p-3  rounded-full"
       >
         <button
           onClick={toggleDropdown}
-          className="focus:outline-none"
+          className="focus:outline-none rounded-full"
           aria-haspopup="menu"
           aria-expanded={isOpen}
         >
-          <div className="flex items-center space-x-2">
-            {isLoggedIn && <span className="font-medium">{user?.name}</span>}
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
+          <div className="flex items-center space-x-2 ">
+            {isLoggedIn && <span className="font-medium text-black bg-gray-100 p-2 rounded-full">{user?.fullName}</span>}
+            <div className=' bg-gray-100 p-2 rounded-full'>
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -45,10 +47,11 @@ function DropDownBtn() {
                 d="M4 6h16M4 12h16M4 18h16"
               />
             </svg>
+            </div>
           </div>
         </button>
         {isOpen && (
-          <div className="absolute top-14 right-0 w-64 bg-white rounded-lg shadow-lg p-4 z-10 hover:shadow-lg transition-shadow duration-300">
+          <div className="absolute top-14 right-5 w-64 bg-white rounded-xl shadow-lg p-4 z-10 hover:shadow-lg transition-shadow duration-300">
             {isLoggedIn ? <LoggedInMenu /> : <LoggedOutMenu />}
           </div>
         )}
