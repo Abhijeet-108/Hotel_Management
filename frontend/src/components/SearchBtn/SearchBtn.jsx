@@ -18,8 +18,6 @@ function SearchBtn() {
     const [children, setChildren] = useState(0);
     const [infants, setInfants] = useState(0);
 
-    
-
     const destRef = useRef();
     const checkInRef = useRef();
     const checkOutRef = useRef();
@@ -45,7 +43,6 @@ function SearchBtn() {
     return (
         <div className="flex items-center shadow-lg border-gray-300 bg-white w-3/4 max-w-4xl mt-4 mb-4 rounded-full">
             {/* Destination */}
-            <div className="w-2/5">
                 <DestinationComponent
                     destRef={destRef}
                     isAnySectionActive={isAnySectionActive}
@@ -57,11 +54,9 @@ function SearchBtn() {
                     destination={destination}
                     setDestination={setDestination}
                 />
-            </div>
             
 
             {/* Check In */}
-            <div className="w-1/5">
                 <CheckIn 
                     checkInRef={checkInRef}
                     isAnySectionActive={isAnySectionActive}
@@ -73,11 +68,9 @@ function SearchBtn() {
                     checkIn={checkIn}
                     setCheckIn={setCheckIn}
                 />
-            </div>
 
 
             {/* Check Out */}
-            <div className="w-1/6">
                 <CheckOut
                     checkOutRef={checkOutRef}
                     isAnySectionActive={isAnySectionActive}
@@ -89,10 +82,8 @@ function SearchBtn() {
                     checkOut={checkOut}
                     setCheckOut={setCheckOut}
                 />
-            </div>
 
             {/* Guests */}
-            <div className="w-1/6">
                 <Guest
                     guestsRef={guestsRef}
                     isAnySectionActive={isAnySectionActive}
@@ -108,9 +99,6 @@ function SearchBtn() {
                     infants={infants}
                     setInfants={setInfants}
                 />
-
-            </div>
-
 
             {/* Search Button */}
             <button
