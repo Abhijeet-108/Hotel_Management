@@ -1,20 +1,33 @@
-import React from 'react'
+import React, { useEffect } from "react";
 
 function GoogleSection({ handleAlternativeLogin }) {
-    return (
-        <div>
+  useEffect(() => {
+    /* You can define this function before initialize */
+    const handleGoogleResponse = (response) => {
+      console.log("Google credential response", response);
+      handleAlternativeLogin("google", response.credential);
+    };
+
+    window.google?.accounts.id.initialize({
+      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+      callback: handleGoogleResponse,
+    });
+
+    window.google?.accounts.id.renderButton(
+      document.getElementById("googleSignInDiv"),
+      { theme: "outline", size: "large" }
+    );
+  }, [handleAlternativeLogin]);
+
+  return (
+    <div>
       <p className="text-sm text-gray-500 mb-4">
-        You'll be redirected to Google to sign in.{' '}
+        You'll be redirected to Google to sign in.{" "}
         <a href="#" className="text-blue-500">Privacy Policy</a>.
       </p>
-      <button
-        onClick={() => handleAlternativeLogin('google')}
-        className="w-full bg-pink-500 text-white p-3 rounded hover:bg-pink-600"
-      >
-        Sign in with Google
-      </button>
+      <div id="googleSignInDiv"></div>
     </div>
-    )
+  );
 }
 
-export default GoogleSection
+export default GoogleSection;

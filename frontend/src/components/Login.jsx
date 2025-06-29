@@ -6,26 +6,34 @@ import GoogleSection from "./Login/GoogleSection";
 import UserDetailsSection from "./Login/UserDetailsSection";
 import { UserDataContext } from "../context/userContext";
 import { useOtpData } from "../context/OtpContext";
+import { useNavigate } from 'react-router-dom';
 
 function Login() {
-  const [loginMethod, setLoginMethod] = useState("phone");
-  const [previousMethod, setPreviousMethod] = useState("");
-  const [step, setStep] = useState(1);
-  const [otp, setOtp] = useState("");
-  const [userDetails, setUserDetails] = useState({ name: "", email: "",  password: "" });
-  const { userData, setUserData } = useContext(UserDataContext);
   const {
     sendOtp,
     verifyOtp,
     registerPhoneUser,
     registerEmailUser,
     registerGoogleUser,
+    checkUserExists,
+    getUserByPhone,
     otpSent,
     verified,
     error,
     resetOtpData,
     login,
+    setOtpData,
   } = useOtpData();
+
+  const [loginMethod, setLoginMethod] = useState("phone");
+  const [previousMethod, setPreviousMethod] = useState("");
+  const [step, setStep] = useState(1);
+  const [otp, setOtp] = useState("");
+  const [userDetails, setUserDetails] = useState({ name: "", email: "",  password: "" });
+  const { userData, setUserData } = useContext(UserDataContext);
+  
+
+  const navigate = useNavigate();
 
   const methodNames = {
     phone: "Phone",
@@ -41,12 +49,20 @@ function Login() {
       return;
     }
 
-    try {
-      await sendOtp(userData.phone);
-      alert("OTP request sent successfully!");
-      setStep(2);
-    } catch (error) {
-      alert(error?.response?.data?.message || "Error sending OTP. Try again.");
+    try{
+      const exists = await checkUserExists(userData.phone);
+
+      if(exists){
+        await sendOtp(userData.phone);
+        alert("OTP sent! Please enter your Otp.")
+        setStep(2);
+      }else{
+        await sendOtp(userData.phone);
+        alert("OTP request sent successfully!");
+        setStep(2);
+      }
+    }catch(error){
+      alert(error?.response?.data?.message || "Error. Try again.")
     }
   };
 
@@ -59,13 +75,29 @@ function Login() {
       return;
     }
     try {
-      const res = await verifyOtp(userData.phone, otp);
-      console.log("verifyOtp response:", res);
-      if(res?.data){
-        login(res.data);
-        console.log(res.data);
-        alert("OTP Verified");
-        setStep(3);
+      const exits = await checkUserExists(userData.phone);
+      if(exits){
+        await verifyOtp(userData.phone, otp);
+        const fetchedUser  = await getUserByPhone(userData.phone)
+        setOtpData((prev) => ({
+          ...prev,
+          userData: fetchedUser ,
+          isPhoneVerified: true,
+        }));
+
+        login(fetchedUser);
+        alert("Otp verified and user loaded");
+        navigate('/')
+      }
+      else{
+        const res = await verifyOtp(userData.phone, otp);
+        console.log("verifyOtp response:", res);
+        if(res?.data){
+          login(res.data);
+          console.log(res.data);
+          alert("OTP Verified");
+          setStep(3);
+        }
       }
     } catch (error) {
       alert(error?.response?.data?.message || "Invalid OTP. Try again.");
@@ -83,10 +115,23 @@ function Login() {
   };
   
   // STEP 1 for Google method
-  const handleAlternativeLogin = (method) => {
-    console.log(`Logging in with ${method}`);
-    setStep(3);
+  const handleAlternativeLogin = async (method, token = null) => {
+  console.log(`Logging in with ${method}`);
+
+  if (method === "google" && token) {
+    try {
+      const data = await registerGoogleUser({ token });
+
+      login(data.data);
+      alert("Google login successful!");
+      navigate('/');
+    } catch (err) {
+      alert("Google login failed: " + err.message);
+    }
+  }
+  
   };
+
   
   const switchLoginMethod = (method) => {
     setPreviousMethod(loginMethod);

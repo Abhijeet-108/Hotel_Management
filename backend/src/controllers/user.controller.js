@@ -5,6 +5,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { saveOtp, getOtpData, deleteOtp } from "../utils/otp.utils.js";
 import { sendOtpToPhone } from "../utils/sms.utils.js";
 import { sendMessageToSocket } from "../../socket.js";
+import { OAuth2Client } from "google-auth-library"
 
 const registerUser = asyncHandler(async (req, res) => {
   const { action } = req.body;
@@ -53,7 +54,7 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Invalid or expired OTP");
       }
 
-      console.log("[verify_otp] record:", record);
+      // console.log("[verify_otp] record:", record);
 
       sendMessageToSocket(phoneNumber, {
         event: "otp_verified",
@@ -71,7 +72,8 @@ const registerUser = asyncHandler(async (req, res) => {
       }
 
       try {
-        const existedUser = await User.findOne({ email, phone: phone }); 
+        const existedUser = await User.findOne({ phone }); 
+        console.log("phone: ", phone);
         if (existedUser) {
           throw new ApiError(409, "User is already registered");
         }
@@ -112,27 +114,100 @@ const registerUser = asyncHandler(async (req, res) => {
     }
 
     case "register_google_user": {
-      const { fullName, email, googleId } = req.body;
+      const { token } = req.body;
 
-      if (!fullName?.trim() || !email?.trim() || !googleId?.trim()) {
-        throw new ApiError(400, "Missing required user details");
+      if(!token){
+        throw new ApiError(400, "Google token is required");
       }
 
-      const existedUser = await User.findOne({ email,  }); 
-      if (existedUser) {
-        throw new ApiError(409, "User is already registered");
+      const client = new OAuth2Client(process.env.CLIENT_ID);
+
+      let payload;
+      try{
+        const ticket = await client.verifyIdToken({
+          idToken: token,
+          audience:process.env.CLIENT_ID
+        })
+        payload = ticket.getPayload();
+      }catch(error){
+        console.log("Google token verification failed:", error);
+        throw new ApiError(401, "Invalid Google token");
       }
 
-      const user = await User.create({ fullName, email, googleId }); 
-      const createdUser = await User.findById(user._id).select("-password");
+      const googleId = payload.sub;
+      const email = payload.email;
+      const fullName = payload.name;
+      const profilePicture = payload.picture;
+
+      if (!googleId || !email || !fullName) {
+        throw new ApiError(400, "Missing required Google user details");
+      }
+
+
+      let user = await User.findOne({ email });
+      if(user){
+        if(user.googleId){
+          return res
+          .status(200)
+          .json(new ApiResponse(200, user, "User Logged is successfully"))
+        } else{
+          throw new ApiError(409, "Email is already registered with a different method");
+        }
+      }
+
+      const newuser = await User.create({ fullName, email, googleId, profilePicture }); 
+      const createdUser = await User.findById(newuser._id).select("-password");
       return res
         .status(201)
         .json(new ApiResponse(200, createdUser, "User registered successfully"));
+    }
+
+    // check existence
+    case "check_user_existence": {
+      const { phone } = req.body;
+
+      if(!phone){
+        throw new ApiError(400, "Phone Number is required");
+      }
+
+      try{
+        const existedUser = await User.findOne({ phone });
+
+        return res
+          .status(200)
+          .json(new ApiResponse(200, {exits: !!existedUser}, "User existence checked")
+        );
+      }
+      catch(error){
+        console.error("Error in check_user_existence: ", error);
+        throw new ApiError(500, error?.message || "Internal Server Error")
+      }
+    }
+
+    case "get_user_by_phone": {
+      const { phone } = req.body;
+
+      if(!phone){
+        throw new ApiError(400, "Phone number is required")
+      }
+
+      try{
+        const user = await User.findOne({ phone }).select("-password");
+        if(!user){
+          throw new ApiError(404, "user not found")
+        }
+        return res.status(200).json(new ApiResponse(200, user, "User data fetched successfully"))
+      }catch(error){
+        console.error("Error in check_user_existence: ", error);
+        throw new ApiError(500, error?.message || "Internal Server Error")
+      }
     }
 
     default:
       throw new ApiError(400, "Invalid action");
   }
 });
+
+
 
 export { registerUser };

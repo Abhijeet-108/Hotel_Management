@@ -32,7 +32,13 @@ function DropDownBtn() {
           aria-expanded={isOpen}
         >
           <div className="flex items-center space-x-2 ">
-            {isLoggedIn && <span className="font-medium text-black bg-gray-100 p-2 rounded-full">{user?.fullName}</span>}
+            {isLoggedIn && (
+              user?.profilePicture ? (
+                <img src={user.profilePicture} alt={user.fullName || "Profile"} className="w-8 h-8 rounded-full" />
+              ) : (
+                <span className="font-medium text-black bg-gray-100 p-2 rounded-full">{user?.fullName}</span>
+              )
+            )}
             <div className=' bg-gray-100 p-2 rounded-full'>
               <svg
                 className="w-6 h-6"

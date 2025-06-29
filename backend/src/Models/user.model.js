@@ -5,7 +5,9 @@ import bcrypt from 'bcrypt'
 const userSchema = mongoose.Schema({
     email: {
         type: String,
-        required: true,
+        required: function() {
+            return !this.googleId; // Email is required if not Google
+        },
         unique: true,
         lowercase: true,
         trim: true,
@@ -18,26 +20,45 @@ const userSchema = mongoose.Schema({
     },
     password: {
         type: String,
-        required: [true, 'Password is required'],
+        required: function() {
+            return !this.googleId; 
+        },
+    },
+    googleId: {
+        type: String,
+        unique: true,
+        sparse: true 
+    },
+    profilePicture: {
+        type: String
     },
     phone: {
-        countryCode: { type: String, required: true },
-        phoneNumber: { type: String, required: true }
+        countryCode: { type: String },
+        phoneNumber: { type: String }
     },
     DOB: {
         day: String,
         month: String,
         year: String,
-    }
+    },
+    profilePicture: { 
+        type: String 
+    },
+    createdAt: { 
+        type: Date, 
+        default: Date.now 
+    },
 }, {
     timestamps: true,
 })
 
+
 userSchema.pre("save", async function(next){
-    if(!this.isModified("password")) return next();
-    this.password = await bcrypt.hash(this.password, 10)
-    next()
-})
+    if (!this.isModified("password") || !this.password) return next();
+    this.password = await bcrypt.hash(this.password, 10);
+    next();
+});
+
 
 userSchema.methods.isPasswordCorrect = async function(password){
     return await bcrypt.compare(password, this.password)

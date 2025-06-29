@@ -100,7 +100,32 @@ const OtpContextProvider = ({ children }) => {
       throw err;
     }
   };
-  
+
+  const checkUserExists = async(phone) => {
+    try{
+      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/v1/users/login`,{
+        action: "check_user_existence",
+        phone,
+      });
+      return res.data.data.exits;
+    }catch(err){
+      setError(err?.response?.data?.message || "Something went wrong")
+    }
+  }
+
+  const getUserByPhone = async(phone) => {
+    try{
+      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/v1/users/login`,{
+        action: "get_user_by_phone",
+        phone,
+      });
+      return res.data.data;
+    }catch(err){
+      setError(err?.response?.data?.message || "Something went wrong")
+      throw err;
+    }
+  }
+
   // REST method: Register email user
   const registerEmailUser = async (userData) => {
     try {
@@ -162,6 +187,8 @@ const OtpContextProvider = ({ children }) => {
         registerPhoneUser,
         registerEmailUser,
         registerGoogleUser,
+        checkUserExists,
+        getUserByPhone,
         error,
         otpSent,
         verified,
