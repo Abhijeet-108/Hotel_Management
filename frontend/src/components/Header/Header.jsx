@@ -54,11 +54,6 @@ function Header() {
                                 </li>
                             ) : null
                         )}
-                        {/* {navItems && (
-                        //     <li>
-                        //         <LogoutBtn />
-                        //     </li>
-                        // )} */}
                     </ul>
                     <div className="relative flex items-center">
                         <DropDownBtn />

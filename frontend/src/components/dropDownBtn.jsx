@@ -8,7 +8,7 @@ function DropDownBtn() {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
   const { isLoggedIn, user } = useOtpData();
-  console.log(isLoggedIn, user)
+  // console.log(isLoggedIn, user)
 
   useOutsideClick(dropdownRef, () => setIsOpen(false));
 

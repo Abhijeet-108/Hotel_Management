@@ -14,11 +14,8 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Action is required");
   }
 
-  // Common validations
-  const phoneNumber =
-    req.body.phone?.countryCode && req.body.phone?.phoneNumber
-      ? req.body.phone.countryCode + req.body.phone.phoneNumber
-      : null;
+  const phoneNumber = req.body.phone?.countryCode && req.body.phone?.phoneNumber
+      ? req.body.phone.countryCode + req.body.phone.phoneNumber : null;
 
   switch (action) {
     case "send_otp": {
@@ -27,12 +24,14 @@ const registerUser = asyncHandler(async (req, res) => {
       }
 
       const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+      
       await saveOtp(phoneNumber, generatedOtp, {
         fullName: req.body.fullName,
         email: req.body.email,
         password: req.body.password,
         phone: req.body.phone,
       });
+      
       await sendOtpToPhone(req.body.phone, generatedOtp);
 
       sendMessageToSocket(phoneNumber, {

@@ -77,7 +77,7 @@ function LoggedInMenu() {
       {LOGGED_IN_ITEMS1.map((item) => (
         <div
           key={item.name}
-          className={`flex items-center p-2 duration-200 ${location.pathname === item.slug ? 'border-b-2 border-black font-semibold' : ''} hover:bg-gray-100 rounded-lg`}
+          className={`flex items-center p-2 duration-200 ${location.pathname === item.slug ? 'border-b-2 border-black font-semibold' : ''} hover:bg-gray-100 rounded-lg cursor-pointer`}
         >
           <span className="flex text-sm font-semibold text-black font-sans hover:bg-gray-100  ">
             <div className="rounded-full flex items-center justify-center mr-2">
