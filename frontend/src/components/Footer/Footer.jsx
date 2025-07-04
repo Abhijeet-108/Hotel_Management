@@ -2,6 +2,8 @@ import React, { useState } from 'react'
 import UniqueStays from './Footer_Component/UniqueStays'
 import Categories from './Footer_Component/Categories'
 import FooterSection from './Footer_Component/FooterSection'
+import StayFinder from './Footer_Component/StayFinder'
+import LastFooterSection from './Footer_Component/LastFooterSection'
 
 function Footer() {
     const [activeTab, setActiveTab] = useState("unique stay")
@@ -50,7 +52,7 @@ function Footer() {
                 <FooterSection />
             </div>
             <div>
-
+                <LastFooterSection />
             </div>
         </footer>
     )

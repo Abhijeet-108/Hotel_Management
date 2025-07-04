@@ -46,7 +46,7 @@ function Hosting() {
                 key={item.name}
                 className={`items-center p-2 duration-200 ${location.pathname === item.slug ? 'border-b-2 border-black font-semibold' : ''} hover:bg-gray-100 rounded-lg cursor-pointer`}
                 >
-                    <span className="text-sm font-normal text-black font-sans hover:bg-gray-100 ">
+                    <span className="text-sm font-normal text-black font-sans hover:underline ">
                     {item.name}
                     </span>
                 </div>
