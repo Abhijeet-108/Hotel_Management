@@ -6,7 +6,7 @@ const userSchema = mongoose.Schema({
     email: {
         type: String,
         required: function() {
-            return !this.googleId; // Email is required if not Google
+            return !this.googleId; 
         },
         unique: true,
         lowercase: true,

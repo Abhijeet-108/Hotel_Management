@@ -83,6 +83,10 @@ const registerUser = asyncHandler(async (req, res) => {
 
         const createdUser = await User.findById(user._id).select("-password");
 
+        if(!createdUser) {
+          throw new ApiError(500, "Something wrong while registering the user")
+        }
+
         return res
           .status(201)
           .json(new ApiResponse(200, createdUser, "User registered successfully"));

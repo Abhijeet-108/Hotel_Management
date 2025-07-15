@@ -1,4 +1,3 @@
-// utils/sms.js
 import twilio from "twilio";
 
 export async function sendOtpToPhone(phone, otp) {
@@ -17,8 +16,6 @@ export async function sendOtpToPhone(phone, otp) {
     console.log(`✅ OTP sent to ${phoneNumber}`);
   } catch (error) {
     console.error(`❌ Twilio error for ${phoneNumber}:`, error.message);
-    // Optional Fallback Logic:
-    // e.g., send an email or log for manual review
     throw new Error("Unable to send OTP via Twilio at this moment.");
   }
 }

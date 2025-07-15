@@ -16,9 +16,10 @@ function CheckIn({
   const [mode, setMode] = useState("Dates");
 
   return (
-    <div
-      className={`flex-1 border-gray-300 p-2 cursor-pointer relative w-full border-r hover:bg-[#e8e8e8] hover:rounded-full 
-        ${showCheckIn ? "bg-white rounded-l-full rounded-r-full shadow-md" : isAnySectionActive ? "bg-[#e8e8e8]" : "bg-white rounded-l-full"}`}
+    <div ref={checkInRef} className="w-1/5">
+      <div
+      className={`flex-1 cursor-pointer justify-center w-full items-center relative border-r border-gray-200
+            ${showCheckIn ? "bg-white rounded-full h-16" : isAnySectionActive ? "bg-[#e8e8e8] h-16" : "bg-white hover:bg-[#e8e8e8] hover:h-16 hover:rounded-full"}`}
       onClick={(e) => {
         e.stopPropagation();
         setShowCheckIn(!showCheckIn);
@@ -26,61 +27,46 @@ function CheckIn({
         setShowCheckOut(false);
         setShowGuests(false);
       }}
-      ref={checkInRef}
     >
-      <div className="font-semibold pl-6">Check in</div>
-      <div className="text-gray-500 pl-6">{checkIn ? new Date(checkIn).toLocaleDateString() : "Add dates"}</div>
-      {showCheckIn && (
-        <div className="absolute top-16 left-0 bg-white shadow-lg rounded-lg p-4 w-[40rem] z-10 mt-4">
-          
-          {/* Buttons */}
-          <div className="flex justify-center mb-4 p-2 ">
-            <div className="flex justify-center items-center bg-gray-200 p-2 rounded-3xl">
-              <button 
-              onClick={(e) => {
-                e.stopPropagation();
-                setMode("Dates");
-              }}
-              className={`px-2 py-1 mr-1 ${mode === "Dates" ? "bg-white" : "bg-gray-200"} rounded-3xl`}
-              >
-                Dates
-              </button>
-              <button 
-              onClick={(e) => {
-                e.stopPropagation();
-                setMode("Months");
-              }}
-              className={`px-2 py-1 mr-1 ${mode === "Months" ? "bg-white" : "bg-gray-200"} rounded-3xl`}
-              >
-                Months
-              </button>
-              <button 
-              onClick={(e) => {
-                e.stopPropagation();
-                setMode("Flexible");
-              }}
-              className={`px-2 py-1 mr-1 ${mode === "Flexible" ? "bg-white" : "bg-gray-200"} hover:rounded-3xl`}
-              >
-                Flexible
-              </button>
-            </div>
-          </div>
-
-          {mode === "Dates" && (
-            <div>
-              <Day setCheckIn={setCheckIn} setShowCheckIn={setShowCheckIn} />
-            </div>
-          )}
-
-          {mode === "Months" && (
-              <div className="flex flex-col items-center">
-                <MonthDial />
-              </div>
-          )}
-          
-        </div>
-      )}
+      <div className="font-semibold text-left pl-4 justify-center items-center">Check in</div>
+      <div className={`text-left pl-4 justify-center items-center ${checkIn ? "text-black font-medium" : "text-gray-500"}`}>
+        {checkIn ? new Date(checkIn).toLocaleDateString() : "Add dates"}
+      </div>
     </div>
+
+    {showCheckIn && (
+      <div className="absolute top-44 left-[25%] bg-white shadow-lg rounded-lg p-4 w-[40rem] z-10">
+        <div className="flex justify-center mb-4 p-2">
+          <div className="flex bg-gray-200 p-1 rounded-full">
+            {["Dates", "Months", "Flexible"].map((label) => (
+              <button
+                key={label}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setMode(label);
+                }}
+                className={`px-3 py-1 text-sm rounded-full ${mode === label ? "bg-white shadow" : "bg-gray-200"}`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {mode === "Dates" && (
+          <div>
+            <Day setCheckIn={setCheckIn} setShowCheckIn={setShowCheckIn} />
+          </div>
+        )}
+        {mode === "Months" && (
+          <div className="flex justify-center">
+            <MonthDial />
+          </div>
+        )}
+      </div>
+    )}
+    </div>
+
   );
 }
 
