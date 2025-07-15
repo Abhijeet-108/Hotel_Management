@@ -17,8 +17,8 @@ function CheckIn({
 
   return (
     <div ref={checkInRef} className="w-1/5">
-      <div
-      className={`flex-1 cursor-pointer justify-center w-full items-center relative border-r border-gray-200
+      <button
+      className={`flex-1 cursor-pointer justify-center w-full items-center relative border-r border-gray-200 
             ${showCheckIn ? "bg-white rounded-full h-16" : isAnySectionActive ? "bg-[#e8e8e8] h-16" : "bg-white hover:bg-[#e8e8e8] hover:h-16 hover:rounded-full"}`}
       onClick={(e) => {
         e.stopPropagation();
@@ -32,7 +32,7 @@ function CheckIn({
       <div className={`text-left pl-4 justify-center items-center ${checkIn ? "text-black font-medium" : "text-gray-500"}`}>
         {checkIn ? new Date(checkIn).toLocaleDateString() : "Add dates"}
       </div>
-    </div>
+    </button>
 
     {showCheckIn && (
       <div className="absolute top-44 left-[25%] bg-white shadow-lg rounded-lg p-4 w-[40rem] z-10">

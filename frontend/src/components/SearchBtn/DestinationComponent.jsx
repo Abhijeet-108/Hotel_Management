@@ -70,7 +70,7 @@ function DestinationComponent({
   ];
 
   return (
-    <div ref={destRef} className='w-1/3 relative'>
+    <div ref={destRef} className='w-1/3'>
       <button
         ref={destRef}
         className={`flex-1 cursor-pointer justify-center items-center relative border-r border-gray-200 rounded-l-full w-full
@@ -90,7 +90,7 @@ function DestinationComponent({
 
       {/* Move popup outside the button */}
       {showDestination && (
-        <div className="absolute top-20 bg-white shadow-lg rounded-3xl p-5 w-96 h-96 z-10 overflow-auto"
+        <div className="absolute top-44 bg-white shadow-lg rounded-3xl p-5 w-96 h-96 z-10 overflow-auto"
           onClick={(e) => e.stopPropagation()}
         >
           <p className="font-semibold text-gray-500 text-sm mb-1">Suggested destinations</p>

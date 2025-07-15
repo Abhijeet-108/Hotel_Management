@@ -19,12 +19,12 @@ function Guest({
   const totalGuests = adults + children + infants;
 
   return (
-    <div className="flex items-center w-1/4 "ref={guestsRef}>
-      <div
-        className={`flex-1 pl-4 cursor-pointer relative w-full
+    <div className="flex items-center w-[27%] "ref={guestsRef}>
+      <button
+        className={`flex-1 pl-4 cursor-pointer relative w-full rounded-r-full
           ${showGuests ? "bg-white rounded-full h-16" 
             : isAnySectionActive ? "bg-[#e8e8e8] h-16" 
-            : "bg-white hover:bg-[#e8e8e8] hover:h-16"}`}
+            : "bg-white hover:bg-[#e8e8e8] hover:h-16 hover:rounded-full"}`}
         onClick={() => {
           setShowGuests(!showGuests);
           setShowDestination(false);
@@ -32,7 +32,7 @@ function Guest({
           setShowCheckOut(false);
         }}
       >
-        <div className='flex items-center w-full gap-2 justify-between'>
+        <div className='flex items-center w-full gap-2 justify-between '>
           <div className='items-center mx-2 '>
             <div className="font-semibold text-left">Who</div>
             <div className="text-gray-500 text-left">
@@ -60,7 +60,7 @@ function Guest({
             {/* <span className="ml-2 hidden md:inline font-semibold">Search</span> */}
           </button>
         </div>
-      </div>
+      </button>
 
       
       {showGuests && (
