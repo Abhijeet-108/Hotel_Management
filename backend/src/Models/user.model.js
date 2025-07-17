@@ -1,4 +1,4 @@
-import mongoose, {Schema} from "mongoose";
+import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import bcrypt from 'bcrypt'
 
@@ -41,9 +41,6 @@ const userSchema = mongoose.Schema({
         month: String,
         year: String,
     },
-    profilePicture: { 
-        type: String 
-    },
     createdAt: { 
         type: Date, 
         default: Date.now 
@@ -51,6 +48,7 @@ const userSchema = mongoose.Schema({
 }, {
     timestamps: true,
 })
+
 
 
 userSchema.pre("save", async function(next){

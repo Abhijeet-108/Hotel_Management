@@ -107,9 +107,11 @@ const OtpContextProvider = ({ children }) => {
         action: "check_user_existence",
         phone,
       });
-      return res.data.data.exits;
+      console.log("checkUserExists response:", res.data);
+      return res.data.data.exists;
     }catch(err){
       setError(err?.response?.data?.message || "Something went wrong")
+      throw err;
     }
   }
 
@@ -119,6 +121,7 @@ const OtpContextProvider = ({ children }) => {
         action: "get_user_by_phone",
         phone,
       });
+      await login(res.data.data);
       return res.data.data;
     }catch(err){
       setError(err?.response?.data?.message || "Something went wrong")

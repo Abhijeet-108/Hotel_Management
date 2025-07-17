@@ -21,7 +21,9 @@
     "google-auth-library": "^10.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.15.2",
+    "mysql2": "^3.14.2",
     "passport-google-oauth20": "^2.0.0",
+    "sequelize": "^6.37.7",
     "socket.io": "^4.8.1",
     "twilio": "^5.7.1"
   },

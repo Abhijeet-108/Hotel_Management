@@ -8,7 +8,7 @@ const UserContext = ({ children }) => {
       countryCode: "+91",
       phoneNumber: "" 
     },
-    fullname: "",
+    fullName: "",
     email: "",
     password: "",
   });

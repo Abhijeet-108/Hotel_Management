@@ -12,10 +12,8 @@ function UserDetailsSection({ handleBack }) {
 
   const navigate = useNavigate();
 
-  // ✅ Get only userData for phone from UserDataContext
   const { userData } = useContext(UserDataContext);
 
-  // ✅ Get login method from OtpContext
   const { login } = useOtpData();
 
   const handleUserDetailsSubmit = async (e) => {
@@ -45,7 +43,6 @@ function UserDetailsSection({ handleBack }) {
       );
 
       if (response.data && response.data.data) {
-        // ✅ Final fix: Just call login() with the returned user data
         login(response.data.data);
         alert('User registered successfully!');
         navigate('/');

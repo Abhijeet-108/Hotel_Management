@@ -1,6 +1,6 @@
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import User from "../Models/user.model.sql.js";
+import { User } from "../Models/user.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { saveOtp, getOtpData, deleteOtp } from "../utils/otp.utils.js";
 import { sendOtpToPhone } from "../utils/sms.utils.js";
@@ -10,17 +10,16 @@ import bcrypt from "bcrypt";
 
 const formatPhoneNumber = (phone) => {
   return phone?.countryCode && phone?.phoneNumber
-    ? phone.countryCode.trim() + phone.phoneNumber.trim()
-    : null;
+  ? phone.countryCode + phone.phoneNumber : null;
 };
 
-const handleSendOtp = async (req, res) => {
+const handleSendOtp = async(req, res) => {
   const phoneNumber = formatPhoneNumber(req.body.phone);
-  if (!phoneNumber) {
+  if(!phoneNumber) {
     throw new ApiError(400, "Valid phone number is required");
   }
 
-  const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+  const generatedOtp = Math.floor(100000 + Math.random()*900000).toString();
 
   await saveOtp(phoneNumber, generatedOtp, {
     fullName: req.body.fullName,
@@ -37,19 +36,18 @@ const handleSendOtp = async (req, res) => {
   });
 
   return res.json(new ApiResponse(200, null, "OTP SENT. Please Verify"));
-};
+}
 
-const handleVerifyOtp = async (req, res) => {
-  console.log("req body", req.body);
+const handleVerifyOtp = async(req, res) => {
   const phoneNumber = formatPhoneNumber(req.body.phone);
   const { otp } = req.body;
 
-  if (!phoneNumber || !otp) {
-    throw new ApiError(400, "Phone number and OTP required");
+  if(!phoneNumber || !otp){
+    throw new ApiError(400, "Phone number and Otp required");
   }
 
   const record = await getOtpData(phoneNumber);
-  if (!record || record.otp !== otp) {
+  if(!record || record.otp !== otp){
     throw new ApiError(400, "Invalid or expired OTP");
   }
 
@@ -58,47 +56,41 @@ const handleVerifyOtp = async (req, res) => {
     data: { phoneNumber },
   });
 
-  return res.json(new ApiResponse(200, record.userData, "OTP Verified"));
-};
+  return res.json(new ApiResponse(200, record.userData, "OTP Verified"))
+}
 
-const handleRegisterPhoneUser = async (req, res) => {
-  console.log("req body", req.body);
+const handleRegisterPhoneUser = async(req, res) => {
   const { fullName, email, password, phone } = req.body;
-  const countryCode = phone?.countryCode;
-  const phoneNumber = phone?.phoneNumber;
-
-  if (!fullName?.trim() || !email?.trim() || !password?.trim() || !countryCode || !phoneNumber) {
-    throw new ApiError(400, "Missing required user details");
+  if(!fullName?.trim() || !email?.trim() || !password?.trim() || !phone){
+    throw new ApiError(400, "Missing required user Details");
   }
 
-  const existedUser = await User.findOne({ where: {countryCode, phoneNumber, } });
-  if (existedUser) {
-    throw new ApiError(409, "User is already registered");
+  const phoneNumber = formatPhoneNumber(phone);
+
+  const existedUser = await User.findOne({ phone });
+  if(!existedUser){
+    throw new ApiError(409, "User is Already registered");
   }
 
-  // const hashedPassword = await bcrypt.hash(password, 6);
+  const hashedPassword = await bcrypt.hash(password, 6);
   const user = await User.create({
-    fullName: fullName,
+    fullName,
     email,
-    password,
-    countryCode,
-    phoneNumber,
-  });
-  const formattedPhone = countryCode + phoneNumber;
-  await deleteOtp(formattedPhone);
-
-  const createdUser = await User.findByPk(user.id, {
-    attributes: { exclude: ["password"] },
+    password: hashedPassword,
+    phone
   });
 
-  if (!createdUser) {
+  await deleteOtp(phoneNumber);
+
+  const createdUser = await User.findById(user._id).select("-password");
+  if(!createdUser){
     throw new ApiError(500, "Something went wrong while registering the user");
   }
 
   return res
-    .status(201)
-    .json(new ApiResponse(201, createdUser, "User registered successfully"));
-};
+  .status(200)
+  .json(new ApiResponse(201, createdUser, "User registered successfully"))
+}
 
 const handleRegisterEmailUser = async (req, res) => {
   const { fullName, email, password } = req.body;
@@ -106,45 +98,36 @@ const handleRegisterEmailUser = async (req, res) => {
     throw new ApiError(400, "Missing required user details");
   }
 
-  const existedUser = await User.findOne({ where: { email } });
+  const existedUser = await User.findOne({ email });
   if (existedUser) {
     throw new ApiError(409, "User is already registered");
   }
 
-  // const hashedPassword = await bcrypt.hash(password, 10);
-  const user = await User.create({
-    fullname: fullName,
-    email,
-    password,
-  });
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const user = await User.create({ fullName, email, password: hashedPassword });
 
-  const createdUser = await User.findByPk(user.id, {
-    attributes: { exclude: ["password"] },
-  });
+  const createdUser = await User.findById(user._id).select("-password");
 
-  return res
-    .status(201)
-    .json(new ApiResponse(201, createdUser, "User registered successfully"));
+  return res.status(201).json(new ApiResponse(201, createdUser, "User registered successfully"));
 };
 
 const handleRegisterGoogleUser = async (req, res) => {
-  // console.log(req.body)
   const { token } = req.body;
 
-  if (!token) {
+  if(!token){
     throw new ApiError(400, "Google token is required");
   }
 
   const client = new OAuth2Client(process.env.CLIENT_ID);
 
   let payload;
-  try {
+  try{
     const ticket = await client.verifyIdToken({
       idToken: token,
-      audience: process.env.CLIENT_ID,
-    });
+      audience:process.env.CLIENT_ID
+    })
     payload = ticket.getPayload();
-  } catch (error) {
+  }catch(error){
     console.log("Google token verification failed:", error);
     throw new ApiError(401, "Invalid Google token");
   }
@@ -158,65 +141,47 @@ const handleRegisterGoogleUser = async (req, res) => {
     throw new ApiError(400, "Missing required Google user details");
   }
 
-  let user = await User.findOne({ where: { email } });
-  if (user) {
-    if (user.googleId) {
+
+  let user = await User.findOne({ email });
+  if(user){
+    if(user.googleId){
       return res
-        .status(200)
-        .json(new ApiResponse(200, user, "User logged in successfully"));
-    } else {
+      .status(200)
+      .json(new ApiResponse(200, user, "User Logged is successfully"))
+    } else{
       throw new ApiError(409, "Email is already registered with a different method");
     }
   }
 
-  const newUser = await User.create({
-    fullName: fullName,
-    email,
-    googleId,
-    profilePicture,
-  });
-
-  const createdUser = await User.findByPk(newUser.id, {
-    attributes: { exclude: ["password"] },
-  });
-
+  const newuser = await User.create({ fullName, email, googleId, profilePicture }); 
+  const createdUser = await User.findById(newuser._id).select("-password");
   return res
     .status(201)
-    .json(new ApiResponse(201, createdUser, "User registered successfully"));
-};
-
-const handleCheckUserExistence = async (req, res) => {
-  const { phone } = req.body;
-  if (!phone) {
-    throw new ApiError(400, "Phone number is required");
+    .json(new ApiResponse(200, createdUser, "User registered successfully"));
 }
 
-  const { countryCode, phoneNumber } = req.body.phone;
-  const existedUser = await User.findOne({ where: { countryCode, phoneNumber } });
-  return res
-    .status(200)
-    .json(new ApiResponse(200, { exists: !!existedUser }, "User existence checked"));
-};
-
-const handleGetUserByPhone = async (req, res) => {
+const handleCheckUserExistence = async(req, res) => {
   const { phone } = req.body;
-  const { countryCode, phoneNumber } = phone || {};
-  
-  if (!countryCode || !phoneNumber) {
+  if(!phone){
     throw new ApiError(400, "Phone number is required");
   }
 
-  const user = await User.findOne({
-    where: { countryCode, phoneNumber },
-    attributes: { exclude: ["password"] },
-  });
+  const existedUser = await User.findOne({ phone });
+  return res.status(200).json(new ApiResponse(200, {exits: !!existedUser }, "User existence checked"));
+}
+
+const handleGetUserByPhone = async (req, res) => {
+  const { phone } = req.body;
+  if (!phone) {
+    throw new ApiError(400, "Phone number is required");
+  }
+
+  const user = await User.findOne({ phone }).select("-password");
   if (!user) {
     throw new ApiError(404, "User not found");
   }
 
-  return res
-    .status(200)
-    .json(new ApiResponse(200, user, "User Login successfully"));
+  return res.status(200).json(new ApiResponse(200, user, "User data fetched successfully"));
 };
 
 const registerUser = asyncHandler(async (req, res) => {
@@ -237,11 +202,15 @@ const registerUser = asyncHandler(async (req, res) => {
   };
 
   const handler = actions[action];
-  if (!handler) {
+  if(!handler){
     throw new ApiError(400, "Invalid Action");
   }
-
-  await handler(req, res);
+  
+  await handler(req, res)
 });
+
+
+
+
 
 export { registerUser };
