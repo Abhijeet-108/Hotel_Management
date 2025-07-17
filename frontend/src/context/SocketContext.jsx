@@ -8,7 +8,7 @@ const socket = io(`${import.meta.env.VITE_API_BASE_URL}`);
 const SocketProvider = ({ children }) => {
     useEffect(() => {
         socket.on("connect", () => {
-            console.log(`🔗 Connected to socket server with ID: ${socket.id}`);
+            console.log(` Connected to socket server with ID: ${socket.id}`);
         });
 
         socket.on("disconnect", () => {

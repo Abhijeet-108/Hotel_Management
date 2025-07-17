@@ -10,9 +10,9 @@ app.use(cors({
 }))
 
 app.use(express.json({limit: "50mb"}))
-app.use(express.urlencoded({extended: true})) // used to add in space
-app.use(express.static("public")) //
-app.use(cookieParser()) // to perform crud and make it secure
+app.use(express.urlencoded({extended: true})) 
+app.use(express.static("public"))
+app.use(cookieParser()) 
 
 // routes
 import userRouter from './routes/user.routes.js'

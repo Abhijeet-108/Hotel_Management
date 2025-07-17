@@ -20,7 +20,7 @@ function PhoneSection({ phone, setPhone, handlePhoneSubmit }) {
         <label className="block text-gray-600 mb-1">Phone number</label>
         <input
           type="text"
-          value={phone?.phoneNumber ?? ""} // ✅ Fallback to empty string
+          value={phone?.phoneNumber ?? ""} 
           onChange={(e) =>
             setPhone({ ...phone, phoneNumber: e.target.value })
           }

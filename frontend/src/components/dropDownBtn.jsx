@@ -36,7 +36,7 @@ function DropDownBtn() {
               user?.profilePicture ? (
                 <img src={user.profilePicture} alt={user.fullName || "Profile"} className="w-8 h-8 rounded-full" />
               ) : (
-                <span className="font-medium text-black bg-gray-100 p-2 rounded-full">{user?.fullName}</span>
+                <span className="font-medium text-black bg-gray-100 p-2 rounded-full">{user.fullName}</span>
               )
             )}
             <div className=' bg-gray-100 p-2 rounded-full'>

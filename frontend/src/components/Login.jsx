@@ -74,25 +74,34 @@ function Login() {
       alert("Please enter an OTP.");
       return;
     }
+
+    const phone = userData.phone;
+    
+    console.log("formattedPhone: ", phone)
     try {
-      const exits = await checkUserExists(userData.phone);
-      if(exits){
-        await verifyOtp(userData.phone, otp);
-        const fetchedUser  = await getUserByPhone(userData.phone)
+      const exist = await checkUserExists(phone);
+      console.log("exist: => ",exist)
+      if(exist){
+        await verifyOtp(phone, otp);
+        const fetchedUser  = await getUserByPhone(phone)
         setOtpData((prev) => ({
           ...prev,
-          userData: fetchedUser ,
+          userData: fetchedUser.data ,
           isPhoneVerified: true,
         }));
-
         login(fetchedUser);
         alert("Otp verified and user loaded");
         navigate('/')
       }
       else{
-        const res = await verifyOtp(userData.phone, otp);
+        const res = await verifyOtp(phone, otp);
         console.log("verifyOtp response:", res);
         if(res?.data){
+          setOtpData((prev) => ({
+            ...prev,
+            userData: res.data,
+            isPhoneVerified: true,
+          }));
           login(res.data);
           console.log(res.data);
           alert("OTP Verified");
