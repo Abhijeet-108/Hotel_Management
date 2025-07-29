@@ -56,6 +56,8 @@ const OtpContextProvider = ({ children }) => {
       userData: {},
       isPhoneVerified: false,
       expiresAt: null,
+    },{
+      withCredentials: true, 
     });
   
   // REST method: Send OTP
@@ -64,6 +66,8 @@ const OtpContextProvider = ({ children }) => {
       const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/v1/users/login`, {
         action: "send_otp",
         phone,
+      },{
+        withCredentials: true, 
       });
       return res.data;
     } catch (err) {
@@ -79,6 +83,8 @@ const OtpContextProvider = ({ children }) => {
         action: "verify_otp",
         phone,
         otp,
+      },{
+        withCredentials: true, 
       });
       return res.data;
     } catch (err) {
@@ -93,6 +99,8 @@ const OtpContextProvider = ({ children }) => {
       const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/v1/users/login`, {
         action: "register_phone_user",
         ...userData,
+      },{
+        withCredentials: true, 
       });
       return res.data;
     } catch (err) {
@@ -106,6 +114,8 @@ const OtpContextProvider = ({ children }) => {
       const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/v1/users/login`,{
         action: "check_user_existence",
         phone,
+      },{
+        withCredentials: true, 
       });
       console.log("checkUserExists response:", res.data);
       return res.data.data.exists;
@@ -120,6 +130,8 @@ const OtpContextProvider = ({ children }) => {
       const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/v1/users/login`,{
         action: "get_user_by_phone",
         phone,
+      },{
+        withCredentials: true, 
       });
       await login(res.data.data);
       return res.data.data;
@@ -135,6 +147,8 @@ const OtpContextProvider = ({ children }) => {
       const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/v1/users/login`, {
         action: "register_email_user",
         ...userData,
+      },{
+        withCredentials: true, 
       });
       return res.data;
     } catch (err) {
@@ -149,6 +163,8 @@ const OtpContextProvider = ({ children }) => {
       const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/v1/users/login`, {
         action: "register_google_user",
         ...userData,
+      },{
+        withCredentials: true, 
       });
       return res.data;
     } catch (err) {
