@@ -47,10 +47,10 @@ const User = sequelize.define("User", {
     type: DataTypes.STRING,
     allowNull: true,
   },
-  hostSocketId: {
-    type: DataTypes.STRING,
-    allowNull: true,
-},
+    hostSocketId: {
+      type: DataTypes.STRING,
+      allowNull: true,
+  },
 }, {
   tableName: "users",
   timestamps: true,
