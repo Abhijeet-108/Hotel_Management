@@ -18,7 +18,7 @@ router.route('/add-places').post(
     addProperty
 );
 router.route('/user-places').get(authenticate, userProperties);
-router.route('/update-place').put(updateProperty);
+router.route('/update-place').put(authenticate, updateProperty);
 
 router.route('/:id').get(propertyById);
 router.route('/search/:key').get(searchProperty)

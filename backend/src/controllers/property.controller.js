@@ -9,7 +9,7 @@ import { Op } from "sequelize";
 // add property
 export const addProperty = asyncHandler(async (req, res) => {
     const userData = req.user;
-    console.log(req.user)
+    // console.log(userData);
     const {title, description, location, price, bedrooms, bathrooms, type, rating} = req.body;
     const uploadImageLocalStorage =  req.files?.image[0]?.path;
     if(!uploadImageLocalStorage){
