@@ -2,44 +2,48 @@ import axios from 'axios';
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
-export const getAddressCordinate = asyncHandler(async(address) => {
-    const apiKey = process.env.GOOGLE_MAPS_API
-    const url = `https://maps.gomaps.pro/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apiKey}`;
-    try{
+export const getAddressCordinate = async (address) => {
+    const apiKey = process.env.GOOGLE_MAPS_API;
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apiKey}`;
+
+    try {
         const response = await axios.get(url);
-        if(response.data.status === 'OK' && response.data.results.length>0){
-            const location = response.data.results[0].geometry.location;
+
+        if (response.data.status === 'OK' && response.data.results.length > 0) {
+            const result = response.data.results[0];
+            const location = result.geometry.location;
+
             return {
-                ltd: location.lat,
-                lng: location.lng
+                lat: location.lat,
+                lng: location.lng,
+                address: result.formatted_address
             };
-        }else{
+        } else {
             throw new ApiError(400, `Error fetching coordinates: ${response.data.status}`);
         }
-    }catch(error){
-        throw new ApiError(401, error,"Error occured in getAddressCordinate");
+    } catch (error) {
+        throw new ApiError(401, error.message || "Unknown error", "Error occurred in getAddressCordinate");
     }
-})
+};
 
-export const getAutoCompleteSuggestions = asyncHandler(async(input) => {
+export const getAutoCompleteSuggestions = async (input) => {
     if (!input) {
-        throw new Error('input are required');
+        throw new ApiError(400, "Input is required");
     }
-    const apiKey = process.env.GOOGLE_MAPS_API;
-    const url = `https://maps.gomaps.pro/maps/api/place/autocomplete/json?input=${encodeURIComponent(input)}&key=${apiKey}`;
 
-    try{
+    const apiKey = process.env.GOOGLE_MAPS_API;
+    const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(input)}&key=${apiKey}`;
+
+    try {
         const response = await axios.get(url);
 
         if (response.data.status === 'OK') {
-            const element = response.data.predictions;
-            
-            return element;
+            return response.data.predictions;
         } else {
-            throw new Error(`Error fetching prediction: ${response.data.status}`);
+            throw new ApiError(400, `Error fetching prediction: ${response.data.status}`);
         }
-    }catch(error){
-        console.error('Error occurred while fetching coordinates:', error.message || error);
-        throw error;
+    } catch (error) {
+        console.error('Error occurred while fetching suggestions:', error.message || error);
+        throw new ApiError(500, error.message || "Internal error", "getAutoCompleteSuggestions failed");
     }
-});
+};
