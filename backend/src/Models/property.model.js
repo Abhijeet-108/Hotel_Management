@@ -1,5 +1,6 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../db/db.sql.js";
+import User from "./user.model.sql.js";
 
 const Property = sequelize.define("Property", {
     id: {
@@ -48,11 +49,17 @@ const Property = sequelize.define("Property", {
         allowNull: false,
     },
     rating: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.FLOAT,
         allowNull: false,
+        validate: {
+            min: 0,
+            max: 5
+        }
     },
 },{
     timestamps: true,
 });
+
+Property.belongsTo(User, { foreignKey: 'owner', as: 'Host' });
 
 export default Property;

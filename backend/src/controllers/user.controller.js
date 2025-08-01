@@ -103,7 +103,7 @@ const handleRegisterPhoneUser = async (req, res) => {
     httpOnly: true,
     secure: false,
     sameSite: "Lax",
-    maxAge: 24 * 60 * 60 * 1000, // 1 day
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
 
   res.cookie("refreshToken", refreshToken, {
