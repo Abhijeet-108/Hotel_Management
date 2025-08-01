@@ -56,6 +56,8 @@ const User = sequelize.define("User", {
   timestamps: true,
 });
 
+
+
 User.beforeCreate(async (user, options) => {
   if (user.password) {
     user.password = await bcrypt.hash(user.password, 10);

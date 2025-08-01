@@ -4,7 +4,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import Property from "../Models/property.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { Op } from "sequelize";
-
+import User from "../Models/user.model.sql.js"
 
 // add property
 export const addProperty = asyncHandler(async (req, res) => {
@@ -81,10 +81,20 @@ export const getProperties = asyncHandler(async (req, res) => {
 // Return property by id
 export const propertyById = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const property = await Property.findByPk(id);
-    if (!property) {
-        throw new ApiError(404, "Property not found");
-    }
+
+
+    const property = await Property.findByPk(id, {
+        include: [
+            {
+                model: User,
+                as: 'Host', 
+                attributes: ['id', 'fullName', 'email'] 
+            }
+        ]
+    });
+    // if (!property) {
+    //     throw new ApiError(404, "Property not found");
+    // }
     return res.status(200).json(new ApiResponse(200, property, "Property fetched successfully"));
 })
 
