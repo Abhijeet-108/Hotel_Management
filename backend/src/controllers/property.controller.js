@@ -5,6 +5,8 @@ import Property from "../Models/property.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { Op } from "sequelize";
 import User from "../Models/user.model.sql.js"
+import axios from "axios";
+import { check } from "express-validator";
 
 // add property
 export const addProperty = asyncHandler(async (req, res) => {
@@ -110,19 +112,32 @@ export const propertyByLocation = asyncHandler(async (req, res) => {
 
 // search property in db
 export const searchProperty = asyncHandler(async (req, res) => {
+    console.log("[searchProperty] Function triggered");
     try {
         const searchword = req.params.key;
-        if(searchword === ""){
-            const allProperties = await Property.findAll();
-            return res.status(200).json(new ApiResponse(200, allProperties, "All properties fetched successfully"));
-        }
-        const searchMatch = await Property.findAll({
-            where: {
-                location: { [Op.iLike]: `%${searchword}%` } 
-            }
-        });
-        return res.status(200).json(new ApiResponse(200, searchMatch, "Properties fetched successfully"));
+        const guests = (req.query.guests || 1);
+        // if(searchword === ""){
+        //     const allProperties = await Property.findAll();
+        //     return res.status(200).json(new ApiResponse(200, allProperties, "All properties fetched successfully"));
+        // }
+
+        const searchMatch = await axios.post('http://localhost:5000/recommend', {
+            destination: searchword,
+            guests: guests,
+            checkin: req.query.checkIn || "",
+            checkout: req.query.checkOut || ""
+        },{
+            timeout: 5000
+        })
+        console.log("[searchProperty] Search response:", searchMatch.data.data);
+
+        const recommend = searchMatch.data?.data || [];
+
+        console.log("[searchProperty] Search results:", recommend);
+
+        return res.status(200).json(new ApiResponse(200, recommend, "Properties fetched successfully"));
     } catch (error) {
-        throw new ApiError(500, "Something went wrong while searching properties");
+        console.error("[searchProperty error]", error?.response?.data || error.message);
+        throw new ApiError(500, "Failed to fetch recommended properties");
     }    
 })
