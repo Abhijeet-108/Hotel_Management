@@ -6,7 +6,7 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { Op } from "sequelize";
 import User from "../Models/user.model.sql.js"
 import axios from "axios";
-import { check } from "express-validator";
+import {getAddressCordinate} from "../services/map.service.js"
 
 // add property
 export const addProperty = asyncHandler(async (req, res) => {
@@ -17,6 +17,7 @@ export const addProperty = asyncHandler(async (req, res) => {
     if(!uploadImageLocalStorage){
         throw new ApiError(400, "Image Require")
     }
+    const { lat, lng } = await getAddressCordinate(location);
     const uploadImage = await uploadOnCloudinary(uploadImageLocalStorage);
     const property = await Property.create({ 
         owner:userData.id,
@@ -29,6 +30,8 @@ export const addProperty = asyncHandler(async (req, res) => {
         type, 
         image: uploadImage?.secure_url,  
         rating,
+        lat,
+        lng,
     });
     return res.status(201).json(new ApiResponse(201, property, "Property added successfully"));
 })
@@ -127,7 +130,7 @@ export const searchProperty = asyncHandler(async (req, res) => {
             checkin: req.query.checkIn || "",
             checkout: req.query.checkOut || ""
         },{
-            timeout: 5000
+            timeout: 15000
         })
         console.log("[searchProperty] Search response:", searchMatch.data.data);
 

@@ -56,6 +56,14 @@ const Property = sequelize.define("Property", {
             max: 5
         }
     },
+    lat: {
+        type: DataTypes.FLOAT,
+        allowNull: false
+    },
+    lng: {
+        type: DataTypes.FLOAT,
+        allowNull: false
+    }
 },{
     timestamps: true,
 });
