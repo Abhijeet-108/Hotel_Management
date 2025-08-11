@@ -9,6 +9,10 @@ from datetime import datetime
 import requests
 import torch
 
+import hashlib
+import json
+import time
+
 app = Flask(__name__)
 
 
@@ -25,10 +29,17 @@ engine = create_engine(f"{DB_TYPE}://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB
 
 
 GOOGLE_MAPS_API_KEY = os.environ.get("GOOGLE_MAPS_API_KEY")
-# print(f"[API KEY] {GOOGLE_MAPS_API_KEY}")
+
+# Load model 
+model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
+df_cache = None
+last_reload_time = 0
+cache_timeout = 60
 
 
 def geocode_destination(destination):
+    # print(f"[GEOCODE] Looking up: {destination}")
+    # print(f"[API_KEY] {GOOGLE_MAPS_API_KEY is not None}")
     url = f"https://maps.googleapis.com/maps/api/geocode/json?address={destination}&key={GOOGLE_MAPS_API_KEY}"
     response = requests.get(url)
     if response.status_code != 200:
@@ -43,19 +54,30 @@ def geocode_destination(destination):
 def load_data():
     try:
         df = pd.read_sql("SELECT * FROM properties", engine)
-        print("Data from properties table:", df.head())
+        # print("Data from properties table:", df.head())
         df.fillna("", inplace=True)
         return df
     except Exception as e:
         print(f"[DB ERROR] {e}")
         return pd.DataFrame([])
+    
+def get_cached_data():
+    global df_cache, last_reload_time
+    current_time = time.time()
+    if df_cache is None or (current_time - last_reload_time) > cache_timeout:
+        df_cache = load_data()
+        last_reload_time = current_time
+    return df_cache
 
-# Load model 
-model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
+def make_json_safe(obj):
+    if isinstance(obj, (pd.Timestamp, datetime)):
+        return obj.isoformat()
+    return obj
 
 @app.route('/recommend', methods=['POST'])
 def recommend():
     try:
+        # print(f"[REQUEST] destination={destination}, guests={guests}, checkin={checkin}, checkout={checkout}")
         data = request.get_json()
         print(f"[REQUEST] {data}")
         destination = data.get("destination", "").strip()
@@ -65,11 +87,11 @@ def recommend():
 
         # Validate destination using Google Maps
         location_coords = geocode_destination(destination)
-        print(f"[GEOLOCATION] {location_coords}")
+        # print(f"[GEOLOCATION] {location_coords}")
         if not location_coords:
             return jsonify({"status": "error", "message": "Invalid destination"}), 400
 
-        df = load_data()
+        df = get_cached_data()
         if df.empty:
             return jsonify({"status": "error", "message": "No property data available"}), 500
 
@@ -89,15 +111,14 @@ def recommend():
         # if df.empty:
         #     return jsonify({"status": "success", "data": []})
         
-        # filter property or recommendation based on Rating
+        # filter by Rating
         if "rating" in df.columns and not df["rating"].isnull().all():
             rating = df["rating"].astype(float).fillna(0)
             min_rating = rating.min()
             max_rating = rating.max()
-            df["nornalized_rating"] = (rating - min_rating) / (max_rating - min_rating + 1e-6)
+            df["normalized_rating"] = (rating - min_rating) / (max_rating - min_rating + 1e-6)
         else:
-            df["nornalized_rating"] = 0.0    
-            
+            df["normalized_rating"] = 0.0
 
         # Combine text fields for recommendation
         df["combined_text"] = df["title"].astype(str) + " " + df["location"].astype(str) + " " + df["description"].astype(str)
@@ -110,13 +131,14 @@ def recommend():
         similarities = util.pytorch_cos_sim(query_embedding, doc_embeddings)[0]
         
         similarities_score = similarities.cpu().numpy()
-        final_score = (0.7 * similarities_score) + (0.3 * df["nornalized_rating"].values)
-        
+        final_score = (0.5 * similarities_score) + (0.5 * df["normalized_rating"].values)
+
         k = min(5, len(final_score))
         top_indices = torch.topk(torch.tensor(final_score), k=k).indices
         
         results = df.iloc[top_indices].to_dict(orient="records")
-
+        
+        # print("[RESPONSE DATA]", results)
         return jsonify({"status": "success", "data": results})
 
     except Exception as e:
@@ -125,8 +147,9 @@ def recommend():
 
 @app.route('/reload', methods=['GET'])
 def reload_data():
-    global df_cache
+    global df_cache, last_reload_time
     df_cache = load_data()
+    last_reload_time = time.time()
     return jsonify({"status": "success", "message": "Data reloaded"}), 200
 
 @app.route('/ping')
