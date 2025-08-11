@@ -9,9 +9,8 @@ from datetime import datetime
 import requests
 import torch
 
-import hashlib
-import json
 import time
+import numpy as np
 
 app = Flask(__name__)
 
@@ -91,9 +90,32 @@ def recommend():
         if not location_coords:
             return jsonify({"status": "error", "message": "Invalid destination"}), 400
 
+        lat, lng = location_coords
+        print(f"[GEOLOCATION] {lat}, {lng}")
+
+        
         df = get_cached_data()
+        
+        R = 6371.0  
+
+        lat1 = np.radians(lat)
+        lng1 = np.radians(lng)
+        lat2 = np.radians(df["lat"])
+        lng2 = np.radians(df["lng"])
+
+        dlat = lat2 - lat1
+        dlng = lng2 - lng1
+
+        a = np.sin(dlat / 2)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlng / 2)**2
+        c = 2 * np.arcsin(np.sqrt(a))
+
+        df["distance_km"] = R * c
+        df = df[df["distance_km"] <= 50]  
+        
         if df.empty:
             return jsonify({"status": "error", "message": "No property data available"}), 500
+
+        df = df.sort_values("distance_km")
 
         # # Filter by check-in/check-out =>
         # if checkin and checkout:
