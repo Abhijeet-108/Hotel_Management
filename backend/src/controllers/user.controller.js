@@ -6,7 +6,6 @@ import { saveOtp, getOtpData, deleteOtp } from "../utils/otp.utils.js";
 import { sendOtpToPhone } from "../utils/sms.utils.js";
 import { sendMessageToSocket } from "../../socket.js";
 import { OAuth2Client } from "google-auth-library";
-import bcrypt from "bcrypt";
 
 const formatPhoneNumber = (phone) => {
   return phone?.countryCode && phone?.phoneNumber
@@ -35,6 +34,8 @@ const handleSendOtp = async (req, res) => {
     event: "otp-sent",
     data: { phoneNumber },
   });
+
+  
 
   return res.json(new ApiResponse(200, null, "OTP SENT. Please Verify"));
 };
@@ -95,6 +96,24 @@ const handleRegisterPhoneUser = async (req, res) => {
     throw new ApiError(500, "Something went wrong while registering the user");
   }
 
+  const accessToken  = user.generateAccessToken();
+  const refreshToken = user.generateRefreshToken();
+
+  res.cookie("token", accessToken, {
+    httpOnly: true,
+    secure: false,
+    sameSite: "Lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  });
+
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: false,
+    sameSite: "Lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  });
+
+
   return res
     .status(201)
     .json(new ApiResponse(201, createdUser, "User registered successfully"));
@@ -121,7 +140,22 @@ const handleRegisterEmailUser = async (req, res) => {
   const createdUser = await User.findByPk(user.id, {
     attributes: { exclude: ["password"] },
   });
+  const accessToken  = user.generateAccessToken();
+  const refreshToken = user.generateRefreshToken();
 
+  res.cookie("token", accessToken, {
+    httpOnly: true,
+    secure: false,
+    sameSite: "Lax",
+    maxAge: 24 * 60 * 60 * 1000, // 1 day
+  });
+
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: false,
+    sameSite: "Lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  });
   return res
     .status(201)
     .json(new ApiResponse(201, createdUser, "User registered successfully"));
@@ -214,6 +248,23 @@ const handleGetUserByPhone = async (req, res) => {
     throw new ApiError(404, "User not found");
   }
 
+  const accessToken  = user.generateAccessToken();
+  const refreshToken = user.generateRefreshToken();
+
+  res.cookie("token", accessToken, {
+    httpOnly: true,
+    secure: false,
+    sameSite: "Lax",
+    maxAge: 24 * 60 * 60 * 1000, // 1 day
+  });
+
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: false,
+    sameSite: "Lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  });
+  
   return res
     .status(200)
     .json(new ApiResponse(200, user, "User Login successfully"));

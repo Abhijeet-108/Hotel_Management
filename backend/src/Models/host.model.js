@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 import { DataTypes } from "sequelize";
 import sequelize from "../db/db.sql.js";
 
-const User = sequelize.define("User", {
+const Host = sequelize.define("host", {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
@@ -52,29 +52,27 @@ const User = sequelize.define("User", {
       allowNull: true,
   },
 }, {
-  tableName: "users",
+  tableName: "hosts",
   timestamps: true,
 });
 
-
-
-User.beforeCreate(async (user, options) => {
-  if (user.password) {
-    user.password = await bcrypt.hash(user.password, 10);
+Host.beforeCreate(async (host, options) => {
+  if (host.password) {
+    host.password = await bcrypt.hash(host.password, 10);
   }
 });
 
-User.beforeUpdate(async (user, options) => {
-  if (user.changed('password')) {
-    user.password = await bcrypt.hash(user.password, 10);
+Host.beforeUpdate(async (host, options) => {
+  if (host.changed('password')) {
+    host.password = await bcrypt.hash(host.password, 10);
   }
 });
 
-User.prototype.isPasswordCorrect = async function(password) {
+Host.prototype.isPasswordCorrect = async function(password) {
   return await bcrypt.compare(password, this.password);
 };
 
-User.prototype.generateAccessToken = function() {
+Host.prototype.generateAccessToken = function() {
   return jwt.sign(
     {
       id: this.id,
@@ -88,7 +86,7 @@ User.prototype.generateAccessToken = function() {
   );
 };
 
-User.prototype.generateRefreshToken = function() {
+Host.prototype.generateRefreshToken = function() {
   return jwt.sign(
     {
       id: this.id,
@@ -100,4 +98,4 @@ User.prototype.generateRefreshToken = function() {
   );
 };
 
-export default User;
+export default Host;
