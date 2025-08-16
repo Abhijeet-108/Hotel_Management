@@ -112,7 +112,9 @@ def recommend():
 
         df["distance_km"] = R * c
         df = df[df["distance_km"] <= 50]  
-        
+
+        print(df.head())
+
         if df.empty:
             return jsonify({"status": "error", "message": "No property data available"}), 500
 

@@ -1,9 +1,8 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
-import jwtDecode from "jwt-decode"; // npm install jwt-decode
+import jwtDecode from "jwt-decode";
 
 const AuthContext = createContext();
 
-// Provider
 export const AuthProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
@@ -27,7 +26,6 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
-    // Call your backend
     const response = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
