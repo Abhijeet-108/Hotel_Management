@@ -48,17 +48,13 @@ const Property = sequelize.define("Property", {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    rating: {
-        type: DataTypes.FLOAT,
-        allowNull: false,
-        validate: {
-            min: 0,
-            max: 5
-        }
+    avgRating: { 
+        type: DataTypes.FLOAT, 
+        defaultValue: 0 
     },
-    lat: {
-        type: DataTypes.FLOAT,
-        allowNull: false
+    reviewCount: { 
+        type: DataTypes.INTEGER, 
+        defaultValue: 0 
     },
     lng: {
         type: DataTypes.FLOAT,
