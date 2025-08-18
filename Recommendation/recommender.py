@@ -4,6 +4,7 @@ import os
 os.environ["TRANSFORMERS_NO_TF"] = "1"
 from sqlalchemy import create_engine
 from sentence_transformers import SentenceTransformer, util
+from sklearn.metrics.pairwise import cosine_similarity
 from datetime import datetime
 
 import requests
@@ -12,6 +13,7 @@ import torch
 
 import time
 import numpy as np
+from functools import lru_cache
 
 app = Flask(__name__)
 
@@ -36,19 +38,25 @@ df_cache = None
 last_reload_time = 0
 cache_timeout = 60
 
-
-def geocode_destination(destination):
+@lru_cache(maxsize=100)
+async def geocode_destination(destination:str):
+    destination = destination.strip().lower()
     # print(f"[GEOCODE] Looking up: {destination}")
     # print(f"[API_KEY] {GOOGLE_MAPS_API_KEY is not None}")
     url = f"https://maps.googleapis.com/maps/api/geocode/json?address={destination}&key={GOOGLE_MAPS_API_KEY}"
-    response = requests.get(url)
-    if response.status_code != 200:
+    try:
+        response = requests.get(url)
+        if response.status_code != 200:
+            return None
+        data = response.json()
+        if not data.get("results"):
+            return None
+        location = data["results"][0]["geometry"]["location"]
+        return location["lat"], location["lng"]
+    except Exception as e:
+        print(f"[GEOCODE ERROR] {e}")
         return None
-    data = response.json()
-    if not data.get("results"):
-        return None
-    location = data["results"][0]["geometry"]["location"]
-    return location["lat"], location["lng"]
+
 
 #  LOAD PROPERTIES 
 def load_data():
@@ -75,7 +83,7 @@ def make_json_safe(obj):
     return obj
 
 @app.route('/recommend', methods=['POST'])
-def recommend():
+async def recommend():
     try:
         # print(f"[REQUEST] destination={destination}, guests={guests}, checkin={checkin}, checkout={checkout}")
         data = request.get_json()
@@ -86,7 +94,7 @@ def recommend():
         checkout = data.get("checkout", "")
 
         # Validate destination using Google Maps
-        location_coords = geocode_destination(destination)
+        location_coords = await geocode_destination(destination)
         # print(f"[GEOLOCATION] {location_coords}")
         if not location_coords:
             return jsonify({"status": "error", "message": "Invalid destination"}), 400
@@ -116,7 +124,7 @@ def recommend():
         print(df.head())
 
         if df.empty:
-            return jsonify({"status": "error", "message": "No property data available"}), 500
+            return jsonify({"status": "Not Found", "message": "No property data available"}), 404
 
         df = df.sort_values("distance_km")
 
@@ -153,9 +161,11 @@ def recommend():
         doc_embeddings = model.encode(description, convert_to_tensor=True)
         query_embedding = model.encode(query_text, convert_to_tensor=True)
         
-        similarities = util.pytorch_cos_sim(query_embedding, doc_embeddings)[0]
-        
-        similarities_score = similarities.cpu().numpy()
+        # similarities = util.pytorch_cos_sim(query_embedding, doc_embeddings)[0]
+        similarities = cosine_similarity(query_embedding.cpu().detach().numpy().reshape(1, -1), doc_embeddings.cpu().detach().numpy())
+
+        # similarities_score = similarities.cpu().numpy()
+        similarities_score = similarities.flatten()
         final_score = (0.5 * similarities_score) + (0.5 * df["normalized_rating"].values)
 
         k = min(5, len(final_score))
