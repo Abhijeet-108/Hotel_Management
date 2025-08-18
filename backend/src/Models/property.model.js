@@ -56,6 +56,10 @@ const Property = sequelize.define("Property", {
         type: DataTypes.INTEGER, 
         defaultValue: 0 
     },
+    lat: {
+        type: DataTypes.FLOAT,
+        allowNull: false
+    },
     lng: {
         type: DataTypes.FLOAT,
         allowNull: false
