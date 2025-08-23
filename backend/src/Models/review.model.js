@@ -41,22 +41,4 @@ Review.associate = (models) => {
     Review.belongsTo(models.Property, { foreignKey: "propertyId", as: "property" });
 };
 
-Review.afterCreate(async (review, options) => {
-    await incrementPropertyRating(review.propertyId, review.rating);
-});
-
-Review.afterUpdate(async (review, options) => {
-    if (review._previousDataValues.rating !== review.rating) {
-        await updatePropertyRating(
-            review.propertyId, 
-            review._previousDataValues.rating, 
-            review.rating
-        );
-    }
-});
-
-Review.afterDestroy(async (review, options) => {
-    await deletePropertyRating(review.propertyId, review.rating);
-});
-
 export default Review;
