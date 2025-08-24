@@ -1,3 +1,4 @@
+from sqlalchemy import text
 from flask import Flask, request, jsonify
 import pandas as pd
 import os
@@ -61,10 +62,11 @@ async def geocode_destination(destination:str):
 #  LOAD PROPERTIES 
 def load_data():
     try:
-        df = pd.read_sql("SELECT * FROM properties", engine)
-        # print("Data from properties table:", df.head())
-        df.fillna("", inplace=True)
-        return df
+        with engine.connect() as conn:
+            df = pd.read_sql(text("SELECT * FROM properties"), conn)
+            print("Data from properties table:", df.head())
+            df.fillna("", inplace=True)
+            return df
     except Exception as e:
         print(f"[DB ERROR] {e}")
         return pd.DataFrame([])
@@ -145,8 +147,8 @@ async def recommend():
         #     return jsonify({"status": "success", "data": []})
         
         # filter by Rating
-        if "rating" in df.columns and not df["rating"].isnull().all():
-            rating = df["rating"].astype(float).fillna(0)
+        if "avgRating" in df.columns and not df["avgRating"].isnull().all():
+            rating = df["avgRating"].astype(float).fillna(0)
             min_rating = rating.min()
             max_rating = rating.max()
             df["normalized_rating"] = (rating - min_rating) / (max_rating - min_rating + 1e-6)

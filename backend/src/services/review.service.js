@@ -1,4 +1,3 @@
-import sequelize from "../db/db.sql";
 import Property from "../Models/property.model.js";
 import { ApiError } from "../utils/ApiError.js";
 
@@ -12,7 +11,7 @@ export const incrementPropertyRating = async (propertyId, newRating) => {
 
     const newCount = oldCount + 1;
 
-    const newRating = ((oldRating * oldCount) + newRating) / newCount;
+    newRating = ((oldRating * oldCount) + newRating) / newCount;
     property.avgRating = newRating;
     property.reviewCount = newCount;
     await property.save();
@@ -42,7 +41,7 @@ export const deletePropertyRating = async (propertyId, oldRating) => {
     const oldCount = property.reviewCount;
     if (oldCount === 0) return;
 
-    const oldRating = property.avgRating;
+    oldRating = property.avgRating;
     const newCount = oldCount -1;
     if(newCount === 0) {
         property.avgRating = 0;

@@ -3,8 +3,7 @@ import mongoose from "mongoose";
 const otpSchema = new mongoose.Schema({
   phoneNumber: { 
     type: String, 
-    required: true, 
-    unique: true 
+    required: true,  
   },
   otp: { 
     type: String, 
@@ -25,5 +24,10 @@ const otpSchema = new mongoose.Schema({
 });
  
 otpSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 }); 
+
+otpSchema.index(
+  { phoneNumber: 1 },
+  { unique: true , partialFilterExpression: { phoneNumber: { $exists: true, $ne: null } } }
+)
 
 export const Otp = mongoose.model("Otp", otpSchema);

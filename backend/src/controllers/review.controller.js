@@ -18,7 +18,7 @@ export const createReview = asyncHandler(async(req, res) => {
 
     await incrementPropertyRating(propertyId, rating);
 
-    return ApiResponse.success(res, review);
+     return res.status(200).json(new ApiResponse(200, review, "Review created successfully"));
 })
 
 // update review
