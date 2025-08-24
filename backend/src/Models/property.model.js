@@ -48,13 +48,13 @@ const Property = sequelize.define("Property", {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    rating: {
-        type: DataTypes.FLOAT,
-        allowNull: false,
-        validate: {
-            min: 0,
-            max: 5
-        }
+    avgRating: { 
+        type: DataTypes.FLOAT, 
+        defaultValue: 0 
+    },
+    reviewCount: { 
+        type: DataTypes.INTEGER, 
+        defaultValue: 0 
     },
     lat: {
         type: DataTypes.FLOAT,
@@ -65,6 +65,7 @@ const Property = sequelize.define("Property", {
         allowNull: false
     }
 },{
+    tableName: "properties",
     timestamps: true,
 });
 
