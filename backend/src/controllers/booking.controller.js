@@ -31,9 +31,10 @@ export const createBooking = asyncHandler(async (req, res) => {
         },
     });
 
-    const alreadyBooked = overlappingBooking.reduce(
-        (sum, b) => sum + b.Guests, 0
-    );
+    const alreadyBooked = 0;
+    overlappingBooking.forEach(element => {
+        alreadyBooked += element.Guests;
+    });
 
     if (alreadyBooked + Guests > property.MaxGuests) {
         throw new ApiError(400, "The property is already booked for the selected dates");
@@ -67,6 +68,7 @@ export const restoreAvailability = asyncHandler(async (req, res) => {
 
     property.availableUnits += booking.Guests;
 
+    booking.status = "Completed";
     await property.save();
 });
 
@@ -104,6 +106,10 @@ export const cancelUserBooking = asyncHandler(async (req, res) => {
     property.availableUnits += booking.Guests;
 
     await property.save();
+
+    booking.status = "canceled";
+    await booking.save();
+
     return res.status(200).json(new ApiResponse(200, null, "Booking canceled successfully"));
 });
 
@@ -111,6 +117,7 @@ export const cancelUserBooking = asyncHandler(async (req, res) => {
 // get all booking for admin
 export const getAllBookings = asyncHandler(async (req, res) => {
     const bookings = await Booking.findAll({
+        attributes: ["id", "checkIn", "checkOut", "Guests", "TotalPrice", "BookingStatus"],
         include: [
             {
                 model: Property,
@@ -126,6 +133,12 @@ export const getAllBookings = asyncHandler(async (req, res) => {
 
     if(!bookings || bookings.length === 0) throw new ApiError(404, "No Bookings found");
 
-    return res.status(200).json(new ApiResponse(200, bookings, "All bookings get successfully"));
+    const formattedBooking = bookings.map((b) =>{
+        const booking = b.toJSON();
+        booking.TotalPrice = booking.Guests * booking.Property.price;
+        return booking;
+    })
+
+    return res.status(200).json(new ApiResponse(200, formattedBooking, "All bookings get successfully"));
 
 });

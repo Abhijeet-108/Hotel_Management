@@ -19,11 +19,13 @@ import userRouter from './routes/user.routes.js'
 import propertyRouter from './routes/property.routes.js';
 import mapRouter from './routes/map.route.js';
 import reviewRouter from './routes/review.route.js';
+import bookingRouter from './routes/booking.route.js';
 
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/property", propertyRouter);
 app.use("/api/v1/map", mapRouter);
 app.use("/api/v1/review", reviewRouter);
+app.use("/api/v1/booking", bookingRouter);
 
 
 export { app };
