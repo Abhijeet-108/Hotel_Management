@@ -111,10 +111,16 @@ export const cancelUserBooking = asyncHandler(async (req, res) => {
 // get all booking for admin
 export const getAllBookings = asyncHandler(async (req, res) => {
     const bookings = await Booking.findAll({
-        include: {
-            model: Property,
-            attributes: ["id", "name", "location", "price"]
-        },
+        include: [
+            {
+                model: Property,
+                attributes: ["id", "name", "location", "price"]
+            },
+            {
+                model: User, 
+                attributes: ["id", "name", "email"]
+            }
+        ],
         order: [['checkIn', 'DESC']]
     });
 
