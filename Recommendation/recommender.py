@@ -64,7 +64,7 @@ def load_data():
     try:
         with engine.connect() as conn:
             df = pd.read_sql(text("SELECT * FROM properties"), conn)
-            print("Data from properties table:", df.head())
+            # print("Data from properties table:", df.head())
             df.fillna("", inplace=True)
             return df
     except Exception as e:

@@ -28,7 +28,7 @@ const handleSendOtp = async (req, res) => {
     phone: req.body.phone,
   });
 
-  await sendOtpToPhone(req.body.phone, generatedOtp);
+  // await sendOtpToPhone(req.body.phone, generatedOtp);
 
   sendMessageToSocket(phoneNumber, {
     event: "otp-sent",
