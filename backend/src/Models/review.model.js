@@ -1,9 +1,6 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../db/db.sql.js";
 import { v4 as uuidv4 } from "uuid";
-import User from "./user.model.sql.js";
-import Property from "./property.model.js";
-import { incrementPropertyRating, updatePropertyRating, deletePropertyRating } from "../services/review.service.js";
 
 const Review = sequelize.define("Review",{
     id: {
