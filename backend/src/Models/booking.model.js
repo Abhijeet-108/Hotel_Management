@@ -1,5 +1,5 @@
 import { DataTypes } from "sequelize";
-import sequelize from "../db/db.sql";
+import sequelize from "../db/db.sql.js";
 import { v4 as uuidv4 } from "uuid";
 
 const Booking = sequelize.define("Booking",{

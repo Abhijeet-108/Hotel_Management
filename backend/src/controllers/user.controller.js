@@ -156,6 +156,7 @@ const handleRegisterEmailUser = async (req, res) => {
     sameSite: "Lax",
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
+
   return res
     .status(201)
     .json(new ApiResponse(201, createdUser, "User registered successfully"));
@@ -212,6 +213,23 @@ const handleRegisterGoogleUser = async (req, res) => {
 
   const createdUser = await User.findByPk(newUser.id, {
     attributes: { exclude: ["password"] },
+  });
+
+  const accessToken  = user.generateAccessToken();
+  const refreshToken = user.generateRefreshToken();
+
+  res.cookie("token", accessToken, {
+    httpOnly: true,
+    secure: false,
+    sameSite: "Lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
+
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: false,
+    sameSite: "Lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000, 
   });
 
   return res

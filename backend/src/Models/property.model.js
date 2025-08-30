@@ -1,6 +1,7 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../db/db.sql.js";
 import User from "./user.model.sql.js";
+import Booking from "./booking.model.js";
 
 const Property = sequelize.define("Property", {
     id: {
@@ -79,6 +80,7 @@ const Property = sequelize.define("Property", {
 });
 
 Property.associate = (models) => {
+
   Property.belongsTo(models.User, {
     foreignKey: "owner",
     as: "Host",

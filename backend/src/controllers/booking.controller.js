@@ -1,10 +1,12 @@
-import { ApiError } from "../utils/ApiError";
-import { ApiResponse } from "../utils/ApiResponse";
-import { asyncHandler } from "../utils/asyncHandler";
-import Property from "../Models/property.model";
-import Booking from "../Models/booking.model";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+// import User from "../Models/user.model.sql.js";
+import models from "../Models/index.js";
 import { Op } from "sequelize";
 
+
+const { Booking, Property, User } = models;
 
 // Booking
 export const createBooking = asyncHandler(async (req, res) => {
@@ -14,7 +16,7 @@ export const createBooking = asyncHandler(async (req, res) => {
     const property = await Property.findByPk(propertyId);
     if (!property) throw new ApiError(404, "Property not found");
     
-    const overlappingBooking = await Booking.findOne({
+    const overlappingBooking = await Booking.findAll({
         where: {
         propertyId,
         BookingStatus: "confirmed",
@@ -31,7 +33,7 @@ export const createBooking = asyncHandler(async (req, res) => {
         },
     });
 
-    const alreadyBooked = 0;
+    let alreadyBooked = 0;
     overlappingBooking.forEach(element => {
         alreadyBooked += element.Guests;
     });
@@ -74,7 +76,8 @@ export const restoreAvailability = asyncHandler(async (req, res) => {
 
 // get user Booking
 export const getUserBookings = asyncHandler(async (req, res) => {
-    const userId = req.user.id;
+    try {
+        const userId = req.user.id;
     if(!userId) throw new ApiError(400, "UnAuthorized");
 
     const booking = await Booking.findAll({
@@ -83,7 +86,8 @@ export const getUserBookings = asyncHandler(async (req, res) => {
         },
         include:{
             model: Property,
-            attributes: ["id", "name", "location", "price"]
+            as: "property",
+            attributes: ["id", "title", "location", "price"]
         },
         order: [['checkIn', 'DESC']]
     })
@@ -91,6 +95,10 @@ export const getUserBookings = asyncHandler(async (req, res) => {
     if(!booking || booking.length === 0) throw new ApiError(404, "No Bookings found");
 
     return res.status(200).json(new ApiResponse(200, booking, "User bookings get successfully"));
+    } catch (error) {
+        console.error("Sequelize Error:", error);
+        return res.status(500).json(new ApiResponse(500, null, "Internal Server Error"));
+    }
 })
 
 // cancel user booking
@@ -121,11 +129,13 @@ export const getAllBookings = asyncHandler(async (req, res) => {
         include: [
             {
                 model: Property,
-                attributes: ["id", "name", "location", "price"]
+                as: "property",
+                attributes: ["id", "title", "location", "price"]
             },
             {
-                model: User, 
-                attributes: ["id", "name", "email"]
+                model: User,
+                as: "user",
+                attributes: ["id", "fullName", "email"]
             }
         ],
         order: [['checkIn', 'DESC']]
@@ -135,7 +145,7 @@ export const getAllBookings = asyncHandler(async (req, res) => {
 
     const formattedBooking = bookings.map((b) =>{
         const booking = b.toJSON();
-        booking.TotalPrice = booking.Guests * booking.Property.price;
+        booking.TotalPrice = booking.Guests * booking.property.price;
         return booking;
     })
 
