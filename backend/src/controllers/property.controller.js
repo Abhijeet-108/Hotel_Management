@@ -3,7 +3,6 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import Property from "../Models/property.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
-import { Op } from "sequelize";
 import User from "../Models/user.model.sql.js"
 import axios from "axios";
 import {getAddressCordinate} from "../services/map.service.js"
@@ -12,7 +11,7 @@ import {getAddressCordinate} from "../services/map.service.js"
 export const addProperty = asyncHandler(async (req, res) => {
     const userData = req.user;
     // console.log(userData);
-    const {title, description, location, price, bedrooms, bathrooms, type, rating} = req.body;
+    const {title, description, location, price, bedrooms, bathrooms, type, avgRating, reviewCount, totalUnits} = req.body;
     const uploadImageLocalStorage =  req.files?.image[0]?.path;
     if(!uploadImageLocalStorage){
         throw new ApiError(400, "Image Require")
@@ -29,16 +28,19 @@ export const addProperty = asyncHandler(async (req, res) => {
         bathrooms, 
         type, 
         image: uploadImage?.secure_url,  
-        rating,
+        avgRating,
+        reviewCount,
         lat,
         lng,
+        totalUnits: totalUnits || 1,
+        availableUnits: totalUnits || 1,
     });
     return res.status(201).json(new ApiResponse(201, property, "Property added successfully"));
 })
 
 // update property
 export const updateProperty = asyncHandler(async (req, res) => {
-    const {id,title, description, location, price, bedrooms, bathrooms, type, rating } = req.body;
+    const {id,title, description, location, price, bedrooms, bathrooms, type, rating, totalUnits, availableUnits } = req.body;
     const property = await Property.findByPk(id);if (!property) {
         throw new ApiError(404, "Property not found");
     }
@@ -59,6 +61,8 @@ export const updateProperty = asyncHandler(async (req, res) => {
             type,
             image: reuploadImage?.secure_url,
             rating,
+            totalUnits,
+            availableUnits
         })
         await property.save();
         return res.status(200).json(new ApiResponse(200, property, "Property updated successfully"));

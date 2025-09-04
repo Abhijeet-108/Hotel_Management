@@ -13,9 +13,9 @@ export async function sendOtpToPhone(phone, otp) {
       from: process.env.TWILIO_PHONE_NUMBER,
       to: phoneNumber,
     });
-    console.log(`✅ OTP sent to ${phoneNumber}`);
+    console.log(`OTP sent to ${phoneNumber}`);
   } catch (error) {
-    console.error(`❌ Twilio error for ${phoneNumber}:`, error.message);
+    console.error(`Twilio error for ${phoneNumber}:`, error.message);
     throw new Error("Unable to send OTP via Twilio at this moment.");
   }
 }
