@@ -1,121 +1,130 @@
-import React from 'react';
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 function DestinationComponent({
   destRef,
-  isAnySectionActive,
   showDestination,
   setShowDestination,
   setShowCheckIn,
   setShowCheckOut,
   setShowGuests,
   destination,
-  setDestination
+  setDestination,
 }) {
-  const destinations = [
-    {
-      name: 'Nearby',
-      image: 'nearby.png',
-      para: "Find what's around you"
-    },
-    {
-      name: 'New Delhi,Delhi',
-      image: 'delhi.png',
-      para: 'For sights like India Gate'
-    },
-    {
-      name: 'Guwahati,Assam',
-      image: 'delhi.png',
-      para: 'For nature lovers'
-    },
-    {
-      name: 'Darjeeling,West Bengal',
-      image: 'delhi.png',
-      para: 'Popular with travellers near you'
-    },
-    {
-      name: 'Puri,Odisha',
-      image: 'delhi.png',
-      para: 'For its seaside allure'
-    },
-    {
-      name: 'Jaipur,Rajasthan',
-      image: 'delhi.png',
-      para: 'For sights like Amber Fort'
-    },
-    {
-      name: 'Puducherry,Puducherry',
-      image: 'delhi.png',
-      para: 'Popular beach destination'
-    },
-    {
-      name: 'Patna,Bihar',
-      image: 'delhi.png',
-      para: 'A hidden gem'
-    },
-    {
-      name: 'Kolkata',
-      image: 'delhi.png',
-      para: 'Gems of India'
-    },
-    {
-      name: 'Pune City,Maharastra',
-      image: 'delhi.png',
-      para: 'For sights of temple'
-    },
-    {
-      name: 'South Goa,Goa',
-      image: 'delhi.png',
-      para: 'Great for Summer gateways'
-    },
+  const [query, setQuery] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const staticDestinations = [
+    { name: "Nearby", para: "Find what's around you" },
+    { name: "New Delhi, Delhi", para: "India Gate & monuments" },
+    { name: "Guwahati, Assam", para: "For nature lovers" },
+    { name: "Darjeeling, West Bengal", para: "Hill station vibes" },
+    { name: "Puri, Odisha", para: "Seaside charm" },
+    { name: "Jaipur, Rajasthan", para: "Amber Fort & culture" },
+    { name: "Puducherry", para: "Beach destination" },
+    { name: "Patna, Bihar", para: "A hidden gem" },
+    { name: "Kolkata", para: "City of joy" },
+    { name: "Pune, Maharashtra", para: "Cultural hub" },
+    { name: "South Goa", para: "Perfect summer getaway" },
   ];
 
+  useEffect(() => {
+    if (!query.trim()) {
+      setSuggestions(staticDestinations);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        setLoading(true);
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/api/v1/map/get_suggestion`,
+          {
+            params: { input: query },
+          }
+        );
+
+        setSuggestions(res.data?.data || []);
+      } catch (err) {
+        console.error("Suggestion error", err);
+        setSuggestions([]);
+      } finally {
+        setLoading(false);
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [query]);
+
   return (
-    <div ref={destRef} className='w-1/3'>
+    <div ref={destRef} className="w-1/3 relative">
+      {/* Input */}
       <button
-        ref={destRef}
-        className={`flex-1 cursor-pointer justify-center items-center relative border-r border-gray-200 rounded-l-full w-full
-          ${showDestination ? "bg-white rounded-full h-16" : isAnySectionActive ? "bg-[#e8e8e8] h-16 rounded-full" : "bg-white hover:bg-[#e8e8e8] hover:h-16 hover:rounded-full"}`}
-        onClick={(e) => {
-          setShowDestination(!showDestination);
+        className={`w-full text-left px-4 py-3 rounded-full border 
+        ${showDestination ? "bg-white" : "bg-gray-100 hover:bg-gray-200"}`}
+        onClick={() => {
+          setShowDestination(true);
           setShowCheckIn(false);
           setShowCheckOut(false);
           setShowGuests(false);
         }}
       >
-        <div className="font-semibold text-left pl-4 justify-center items-center">Where</div>
-        <div className={`text-left pl-4 justify-center items-center ${destination ? "text-black font-medium" : "text-gray-500"}`}>
-          {destination || "Search destinations"}
-        </div>
+        <p className="font-semibold">Where</p>
+        <input
+          type="text"
+          value={query || destination}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setDestination("");
+          }}
+          placeholder="Search destination"
+          className="w-full bg-transparent outline-none text-gray-700"
+        />
       </button>
 
-      {/* Move popup outside the button */}
+      {/* Suggestions */}
       {showDestination && (
-        <div className="absolute top-44 bg-white shadow-lg rounded-3xl p-5 w-96 h-96 z-10 overflow-auto"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <p className="font-semibold text-gray-500 text-sm mb-1">Suggested destinations</p>
-          {destinations.map((dest) => (
-            <div
-              key={dest.name}
-              className="flex items-start p-3 rounded-xl cursor-pointer hover:bg-gray-100 transition"
-              onClick={() => {
-                setDestination(dest.name);
-                setShowDestination(false);
-              }}
-            >
-              {dest.image && (
-                <img
-                  src={dest.image}
-                  alt={`${dest.name} icon`}
-                  className="w-12 h-12 rounded-2xl flex-shrink-0 mr-3"
-                />
-              )}
-              <div className="flex flex-col text-left">
-                <span className="font-semibold text-gray-800">{dest.name}</span>
-                <span className="text-gray-500 text-sm">{dest.para}</span>
-              </div>
-            </div>
-          ))}
+        <div className="absolute top-20 left-0 w-96 bg-white rounded-3xl shadow-xl p-4 max-h-96 overflow-auto z-50">
+          <p className="text-sm font-semibold text-gray-500 mb-2">
+            Suggested destinations
+          </p>
+
+          {loading && (
+            <p className="text-sm text-gray-400">Searching...</p>
+          )}
+
+          {!loading &&
+            suggestions.map((item, index) => {
+              const label = item.description || item.name;
+
+              return (
+                <div
+                  key={index}
+                  className={`flex gap-3 p-3 rounded-xl cursor-pointer
+                  ${
+                    label === destination
+                      ? "bg-gray-200"
+                      : "hover:bg-gray-100"
+                  }`}
+                  onClick={() => {
+                    setQuery(label);
+                    setDestination(label);
+                  }}
+                >
+                  <div className="w-10 h-10 bg-gray-200 rounded-xl flex items-center justify-center">
+                  📍
+                </div>
+                  <div>
+                    <p className="font-semibold">{label}</p>
+                    <p className="text-sm text-gray-500">
+                      {item.structured_formatting?.secondary_text ||
+                        item.para}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
         </div>
       )}
     </div>

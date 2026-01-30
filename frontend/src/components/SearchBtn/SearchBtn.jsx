@@ -4,6 +4,7 @@ import DestinationComponent from "./DestinationComponent";
 import CheckIn from "./CheckIn";
 import CheckOut from "./CheckOut";
 import Guest from "./Guest";
+import { LoadScript } from "@react-google-maps/api";
 
 function SearchBtn() {
   const [showDestination, setShowDestination] = useState(false);
@@ -45,17 +46,18 @@ function SearchBtn() {
       ${isAnySectionActive ? "bg-[#e8e8e8]" : "bg-white"}`}
     >
       {/* Destination */}
-      <DestinationComponent
-        destRef={destRef}
-        isAnySectionActive={isAnySectionActive}
-        showDestination={showDestination}
-        setShowDestination={setShowDestination}
-        setShowCheckIn={setShowCheckIn}
-        setShowCheckOut={setShowCheckOut}
-        setShowGuests={setShowGuests}
-        destination={destination}
-        setDestination={setDestination}
-      />
+      
+        <DestinationComponent
+          destRef={destRef}
+          isAnySectionActive={isAnySectionActive}
+          showDestination={showDestination}
+          setShowDestination={setShowDestination}
+          setShowCheckIn={setShowCheckIn}
+          setShowCheckOut={setShowCheckOut}
+          setShowGuests={setShowGuests}
+          destination={destination}
+          setDestination={setDestination}
+        />
 
       {/* Check In */}
       <CheckIn

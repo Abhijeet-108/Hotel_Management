@@ -1,100 +1,121 @@
-import React from 'react'
+import { useEffect, useState } from "react";
 
 function HomeContent() {
-    const Rooms = [
-        {
-            name: "Home 1",
-            image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-            price: 1000,
-            rating: 4.5,
-            reviews: 100,
-            location: "North24 Parganas",
-            type: "House",
-            capacity: 4,
-        },
-        {
-            name: "Home 2",
-            image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-            price: 1000,
-            rating: 4,
-            reviews: 100,
-            location: "North24 Parganas",
-            type: "House",
-            capacity: 4,
-        },
-        {
-            name: "Home 3",
-            image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-            price: 1000,
-            rating: 3.5,
-            reviews: 100,
-            location: "North24 Parganas",
-            type: "House",
-            capacity: 4,
-        },
-        {
-            name: "Home 4",
-            image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-            price: 1000,
-            rating: 4.2,
-            reviews: 100,
-            location: "North24 Parganas",
-            type: "House",
-            capacity: 4,
-        }
-    ]
+    const [hotels, setHotels] = useState([]);
+    const [locate, setLocate] = useState("");
+
+    useEffect(() => {
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                setLocate({
+                    lat: pos.coords.latitude,
+                    lng: pos.coords.longitude,
+                });
+                // console.log("Current Position:", lat, lng);
+            },
+            (err) => {
+                console.error("Error getting location:", err);
+            }
+        )
+    },[]);
+
+    useEffect(() => {
+        const fetchHotels = async () => {
+            try {
+                const response = await fetch(
+                    `${import.meta.env.VITE_API_BASE_URL}/api/v1/property`
+                );
+                // const location = await fetch(
+                //     `${import.meta.env.VITE_API_BASE_URL}/api/v1/map/get_coordinates`,
+                //     {
+                //         params: { input: locate },
+                //     }
+                // )
+                const result = await response.json();
+
+                // const locData = await location.json();
+                // console.log("LOCATION DATA:", locData);
+
+                // console.log("API RESPONSE:", result);
+                setHotels(result.data || []);
+            } catch (error) {
+                console.error("Error fetching hotels:", error);
+            }
+        };
+
+        fetchHotels();
+    }, []);
+
+    const getDistance = (lat1, lon1, lat2, lon2) => {
+        const R = 6371;
+        const dLat = ((lat2 - lat1) * Math.PI) / 180;
+        const dLon = ((lon2 - lon1) * Math.PI) / 180;
+        const a = 
+            Math.sin(dLat / 2) ** 2 +
+            Math.cos(lat1 * Math.PI / 180) *
+            Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) ** 2;
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        // console.log("Distance:", R * c);
+        return R * c;
+    }
+
+    const nearbyHotels = locate ? hotels.filter(
+        hotel => getDistance(locate.lat, locate.lng, hotel.lat, hotel.lng) <= 100
+    ):[];
+
+    const renderHotels = (title, data) => (
+        <div className="m-8">
+            <h2 className="text-xl font-semibold mb-3">{title}</h2>
+            <div className="flex flex-wrap gap-4">
+                {data.map(hotel => (
+                    <div key={hotel.id} className="w-[200px]">
+                        <img
+                            src={hotel.image}
+                            className="rounded-lg"
+                            alt={hotel.title}
+                        />
+                        <h3 className="text-sm font-semibold">
+                            {hotel.title} in {hotel.location}
+                        </h3>
+                        <p className="text-xs text-gray-500">
+                            ₹{hotel.price} · ★ {hotel.avgRating || 4.5}
+                        </p>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+
     return (
         <>
-            <div className='m-8 '>
-                <h1 className='text-xl font-semibold'>Popular homes in {Rooms[0].location}> </h1>
-                <div className='flex flex-wrap gap-4 mt-2'>
-                    {Rooms.map(room => (
-                        <div key={room.name}>
-                            <img width={200} height={300} className='rounded-lg' src={room.image} alt={room.name} />
-                            <h3 className='text-sm font-semibold'>{room.name}</h3>
-                            <p className='text-xs font-semibold text-gray-500'>₹{room.price} for 2 nights.★ {room.rating}</p>
-                        </div>
-                    ))}
-                </div>
-            </div>
-            <div className='m-8 '>
-                <h1 className='text-xl font-semibold'>Available next month in Darjeeling > </h1>
-                <div className='flex flex-wrap gap-4 mt-2'>
-                    {Rooms.map(room => (
-                        <div key={room.name}>
-                            <img width={200} height={300} className='rounded-lg' src={room.image} alt={room.name} />
-                            <h3 className='text-sm font-semibold'>{room.name}</h3>
-                            <p className='text-xs font-semibold text-gray-500'>₹{room.price} for 2 nights.★ {room.rating}</p>
-                        </div>
-                    ))}
-                </div>
-            </div>
-            <div className='m-8 '>
-                <h1 className='text-xl font-semibold'>Stay in Bengaluru> </h1>
-                <div className='flex flex-wrap gap-4 mt-2'>
-                    {Rooms.map(room => (
-                        <div key={room.name}>
-                            <img width={200} height={300} className='rounded-lg' src={room.image} alt={room.name} />
-                            <h3 className='text-sm font-semibold'>{room.name}</h3>
-                            <p className='text-xs font-semibold text-gray-500'>₹{room.price} for 2 nights.★ {room.rating}</p>
-                        </div>
-                    ))}
-                </div>
-            </div>
-            <div className='m-8 '>
-                <h1 className='text-xl font-semibold'>Available in Puri this weekend > </h1>
-                <div className='flex flex-wrap gap-4 mt-2'>
-                    {Rooms.map(room => (
-                        <div key={room.name}>
-                            <img width={200} height={300} className='rounded-lg' src={room.image} alt={room.name} />
-                            <h3 className='text-sm font-semibold'>{room.name}</h3>
-                            <p className='text-xs font-semibold text-gray-500'>₹{room.price} for 2 nights.★ {room.rating}</p>
-                        </div>
-                    ))}
-                </div>
-            </div>
+            {renderHotels("🏠 Nearby stays", nearbyHotels)}
+            {renderHotels(
+                "📍 Popular in Delhi",
+                hotels.filter(h =>
+                    h.location?.toLowerCase().includes("delhi")
+                )
+            )}
+            {renderHotels(
+                "🌴 Stay in Kolkata",
+                hotels.filter(h =>
+                    h.location?.toLowerCase().includes("kolkata")
+                )
+            )}
+            {renderHotels(
+                "🌆 Stay in Bengaluru",
+                hotels.filter(h =>
+                    h.location?.toLowerCase().includes("bengaluru")
+                )
+            )}
+            {renderHotels(
+                "🏖️ Weekend in Puri",
+                hotels.filter(h =>
+                    h.location?.toLowerCase().includes("puri")
+                )
+            )}
         </>
-    )
+    );
 }
 
-export default HomeContent
+export default HomeContent;
