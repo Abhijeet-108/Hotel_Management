@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function HomeContent() {
     const [hotels, setHotels] = useState([]);
     const [locate, setLocate] = useState("");
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         navigator.geolocation.getCurrentPosition(
@@ -61,7 +64,7 @@ function HomeContent() {
     }
 
     const nearbyHotels = locate ? hotels.filter(
-        hotel => getDistance(locate.lat, locate.lng, hotel.lat, hotel.lng) <= 100
+        hotel => getDistance(locate.lat, locate.lng, hotel.lat, hotel.lng) <= 50
     ):[];
 
     const renderHotels = (title, data) => (
@@ -69,7 +72,8 @@ function HomeContent() {
             <h2 className="text-xl font-semibold mb-3">{title}</h2>
             <div className="flex flex-wrap gap-4">
                 {data.map(hotel => (
-                    <div key={hotel.id} className="w-[200px]">
+                    <div key={hotel.id} className="w-[200px]" 
+                    onClick={() => navigate(`/property/${hotel.id}`)}>
                         <img
                             src={hotel.image}
                             className="rounded-lg"
